@@ -1,0 +1,5 @@
+.class
+*.exe
+*~
+*/node_modules/
+/gymod/chart/code/

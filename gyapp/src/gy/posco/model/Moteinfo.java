@@ -165,4 +165,12 @@ public class Moteinfo  {
 		
 	}
 
+	@Override
+	public String toString() {
+		return "Moteinfo [mmgb=" + mmgb + ", seq=" + seq + ", bno=" + bno + ", cntgb=" + cntgb + ", swseq=" + swseq
+				+ ", batt=" + batt + ", act=" + act + ", rtd1=" + rtd1 + ", rtd2=" + rtd2 + ", rtd3=" + rtd3 + ", temp="
+				+ temp + ", stand=" + stand + ", loc=" + loc + ", tb=" + tb + ", tempD=" + tempD + ", tempW=" + tempW
+				+ ", tm=" + tm + "]";
+	}
+
 }

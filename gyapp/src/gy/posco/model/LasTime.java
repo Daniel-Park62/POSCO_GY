@@ -6,6 +6,8 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.eclipse.persistence.annotations.ReadOnly;
 
@@ -20,10 +22,10 @@ import com.ibm.icu.text.SimpleDateFormat;
 @NamedQuery(name="LasTime.findAll", query="SELECT l FROM LasTime l")
 public class LasTime  {
 
-
 	@Id
 	private int pkey;
 	
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastm;
 
 	private LasTime() {	}   
@@ -33,7 +35,8 @@ public class LasTime  {
 
 	public void setPkey(int pkey) {
 		this.pkey = pkey;
-	}   
+	}
+	
 	public Date getLastm() {
 		return this.lastm;
 	}

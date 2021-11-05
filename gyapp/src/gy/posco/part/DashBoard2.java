@@ -83,7 +83,7 @@ public class DashBoard2 {
 	    tbl.addListener(SWT.MeasureItem,  new Listener() {
 	    	@Override
 	    	public void handleEvent(Event event) {
-	    		event.height = (int)(event.gc.getFontMetrics().getHeight() * 1.8) ;
+	    		event.height = (int)(event.gc.getFontMetrics().getHeight() * 1.5) ;
 	    	}
 	    });		
 //	    tbl.layout();
@@ -276,7 +276,7 @@ public class DashBoard2 {
 		time_c = AppMain.appmain.getLasTime(1) ;
 
 		List<Moteinfo> moteinfo = em.createQuery("select m from Moteinfo m, LasTime l "
-				+ " where m.tm = l.lastm order by m.stand, m.tb desc ", Moteinfo.class)
+				+ " where m.tm = l.lastm order by m.mmgb , case when m.stand = 0 then 999 else m.stand end, m.tb desc ", Moteinfo.class)
 				.getResultList() ;
 
 		tv.setInput(moteinfo);

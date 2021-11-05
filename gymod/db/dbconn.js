@@ -7,13 +7,20 @@ const pool = mariadb.createPool({
       user: config.user,
       password: config.password,
       database: config.database,
-      acquireTimeout : 60000,
-      connectionLimit: 15
+      idleTimeout : 60,
+      acquireTimeout : 180000,
+      connectionLimit: 5
 }) ;
 
 module.exports = {
   getConn : () => { 
-    return pool.getConnection() ;
+    return  mariadb.createConnection({
+      host: config.host,
+      port: config.port,
+      user: config.user,
+      password: config.password,
+      database: config.database
+    }) ;
   },
   getPool : () => { return pool ;}
 }

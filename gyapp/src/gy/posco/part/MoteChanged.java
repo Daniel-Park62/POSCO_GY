@@ -343,7 +343,6 @@ public class MoteChanged  {
 		toDate.setText(dateFmt1.format(todt ) );
 		toTm.setText(timeFmt.format(todt ) );
 
-
 	}
 
 	private void retriveData(String sfrom, String sto ) {
@@ -355,9 +354,10 @@ public class MoteChanged  {
 			MessageDialog.openError(parent.getShell(), "날짜확인", "날짜입력이 바르지 않습니다.") ;
 			return ;
 		}
+		
 		String qval = "";
-		String qcol = (btnS.getSelection() ? "'" + cbddown.getText() +"'"  : cbddown.getText()) ;
-		if (btnb.getSelection()) qcol = qcol.substring(0, 1) ; 
+		String qcol = cbddown.getText()  ;
+		if (btnb.getSelection()) qcol = "'" + qcol.substring(0, 1) + "'"; 
 		if  (cbddown.getSelectionIndex() > 0) {
 			qval = "where " +  (btnm.getSelection() ? "seq " : btnb.getSelection() ? "loc " : "stand " ) + "= " + qcol;
 		}

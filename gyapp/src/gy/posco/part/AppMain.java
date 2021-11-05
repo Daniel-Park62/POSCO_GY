@@ -77,14 +77,14 @@ public class AppMain extends ApplicationWindow {
 	public IcallFunc callf = null;
 	public static Composite cur_comp;
 	public static AppMain appmain;
-	Image img_top; // = AppMain.getMyimage("dashboard_t.png");
-	Image img_topr; // = AppMain.getMyimage("category.png");
-	Image img_act; // = resizeImg( AppMain.getMyimage("icon_active.png"), 25,25);
-	Image img_inact; // = resizeImg( AppMain.getMyimage("icon_inactive.png"), 25,25);
-	Image img_discon; // = resizeImg( AppMain.getMyimage("icon_discon.png"), 25,25);
-	Image img_danger; // = resizeImg( AppMain.getMyimage("icon_danger.png"), 25,25);
-	Image img_warn; // = resizeImg( AppMain.getMyimage("icon_warn.png"), 25,25);
-	Image img_lowb; // = resizeImg( AppMain.getMyimage("lowbatt.png"), 25,25);
+	public static Image img_top ; // = AppMain.getMyimage("dashboard_t.png");
+	public static Image img_topr ; // = AppMain.getMyimage("category.png");
+	public static Image img_act  ; // = resizeImg( AppMain.getMyimage("icon_active.png"), 25,25);
+	public static Image img_inact ; // = resizeImg( AppMain.getMyimage("icon_inactive.png"), 25,25);
+	public static Image img_discon ; // = resizeImg( AppMain.getMyimage("icon_discon.png"), 25,25);
+	public static Image img_danger ; // = resizeImg( AppMain.getMyimage("icon_danger.png"), 25,25);
+	public static Image img_warn ; // = resizeImg( AppMain.getMyimage("icon_warn.png"), 25,25);
+	public static Image img_lowb ; // = resizeImg( AppMain.getMyimage("lowbatt.png"), 25,25);
 
 	Label lblDate;
 	Label lblinterval;
@@ -105,17 +105,17 @@ public class AppMain extends ApplicationWindow {
 		createActions();
 		addToolBar(SWT.FLAT | SWT.WRAP);
 		addMenuBar();
-
+		System.out.println("** 4PCM 모니터링 프로그램 Start!!");
 		reloaddata();
 		appmain = this;
 		img_top = AppMain.getMyimage("dashboard_t.png");
 		img_topr = AppMain.getMyimage("category.png");
-		img_act = resizeImg(AppMain.getMyimage("icon_active.png"), 30, 30);
-		img_inact = resizeImg(AppMain.getMyimage("icon_inactive.png"), 30, 30);
-		img_discon = resizeImg(AppMain.getMyimage("icon_discon.png"), 30, 30);
-		img_danger = resizeImg(AppMain.getMyimage("icon_danger.png"), 30, 30);
-		img_warn = resizeImg(AppMain.getMyimage("icon_warn.png"), 30, 30);
-		img_lowb = resizeImg(AppMain.getMyimage("lowbatt.png"), 30, 30);
+		img_act = AppMain.resizeImg(AppMain.getMyimage("icon_active.png"), 30, 30);
+		img_inact = AppMain.resizeImg(AppMain.getMyimage("icon_inactive.png"), 30, 30);
+		img_discon = AppMain.resizeImg(AppMain.getMyimage("icon_discon.png"), 30, 30);
+		img_danger = AppMain.resizeImg(AppMain.getMyimage("icon_danger.png"), 30, 30);
+		img_warn = AppMain.resizeImg(AppMain.getMyimage("icon_warn.png"), 30, 30);
+		img_lowb = AppMain.resizeImg(AppMain.getMyimage("lowbatt.png"), 30, 30);
 //		addStatusLine();
 	}
 
@@ -181,7 +181,7 @@ public class AppMain extends ApplicationWindow {
 		@Override
 		public void run() {
 			while (!Thread.currentThread().isInterrupted() && !lblinterval.isDisposed()) {
-				display.syncExec(() -> refreshData());
+				display.asyncExec(() -> refreshData());
 				try {
 					Thread.sleep(interval);
 				} catch (InterruptedException e) {
@@ -203,6 +203,7 @@ public class AppMain extends ApplicationWindow {
 		time_sv = time_c;
 
 		lblinterval.setText(MOTECNF.getMeasure() + "초단위 수집");
+		lblinterval.requestLayout();
 		lblDate.setText(dateFormat.format(time_c));
 		lblDate.pack();
 

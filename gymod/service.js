@@ -22,15 +22,16 @@ router.post('/sq', (req, res) => {
   // bodym = JSON.parse(JSON.stringify(req.body));
   // console.log(bodym) ;
   con.query(
-      "SELECT " + req.body.gb + " as seq, temp,  date_format(tm,'%Y-%m-%d %T') tm  FROM motehist  \
+      "SELECT " + req.body.gb + " as seq, temp,  date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
       where "+ req.body.cond + " and tm between ? and ?  and temp between ? and ? order by seq, tm " ,
        [ fdt, tdt, req.body.ftemp, req.body.ttemp] )
     .then( dt => {
         // motesmac = JSON.parse(JSON.stringify(dt)) ;
+
         let rdata = [];
         let tdata = [];
         let cat = [];
-        let sv_seq = dt[0].seq || 1;
+        let sv_seq = dt.length > 0 ? dt[0].seq : 1;
         let sw=0 ;
         dt.forEach((e,i) => {
           if  (sv_seq != e.seq  ) {

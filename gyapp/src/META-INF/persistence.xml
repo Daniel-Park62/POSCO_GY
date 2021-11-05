@@ -14,7 +14,7 @@
 			<property name="javax.persistence.jdbc.user" value="pocusr"/>
 			<property name="javax.persistence.jdbc.password" value="dawinit1"/>
 			<property name="eclipselink.target-database" value="MySQL"/>
-			<property name="eclipselink.logging.level" value="INFO"/>
+			<property name="eclipselink.logging.level" value="OFF"/>
 		</properties>
 	</persistence-unit>
 </persistence>

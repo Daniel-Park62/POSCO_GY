@@ -134,7 +134,7 @@ public class RegMote {
 					if (newmote.open() == Window.OK) {
 						if (newmote.getMote().getSeq() > 0) {
 							em.getTransaction().begin();
-							em.merge(newmote.getMote());
+							em.persist(newmote.getMote());
 							em.getTransaction().commit();
 							refreshSensorList();
 						} else {
@@ -341,6 +341,22 @@ public class RegMote {
 		spinner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		spinner.setSize(120, -1);
 
+		Label lblbatt = new Label(group_t, SWT.NONE);
+		lblbatt.setText("   배터리경고기준 ");
+		lblbatt.setFont(font3);
+		lblbatt.setAlignment(SWT.RIGHT);
+		lblbatt.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
+		lblbatt.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+
+		Spinner spbatt = new Spinner(group_t, SWT.BORDER | SWT.CENTER);
+		spbatt.setMinimum(3000);
+		spbatt.setMaximum(4000);
+		spbatt.setSelection(moteconfig.getBatt());
+		spbatt.setIncrement(100);
+		spbatt.setFont(font3);
+		spbatt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		spbatt.setSize(180, -1);
+
 		/*
 		 * Label lblmeasure = new Label(group_t, SWT.NONE);
 		 * lblmeasure.setText("Time Interval"); lblmeasure.setAlignment(SWT.RIGHT);
@@ -367,7 +383,7 @@ public class RegMote {
 		Composite btncontainer = new Composite(group_t, SWT.NONE);
 
 		btncontainer.setLayout(new GridLayout(2, false));
-		btncontainer.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true, 3, 1));
+		btncontainer.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, true));
 		btncontainer.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 		{
 			Button b = new Button(btncontainer, SWT.PUSH);
@@ -381,10 +397,12 @@ public class RegMote {
 				public void widgetSelected(SelectionEvent e) {
 
 					int lmeas = spinner.getSelection();
+					int lbatt = spbatt.getSelection();
 
 					if (AppMain.sendMeasur(lmeas + "") == 1) {
 						moteconfig.setSyscode(systext.getText());
 						moteconfig.setMeasure((short) lmeas);
+						moteconfig.setBatt(lbatt);
 						em.getTransaction().begin();
 						em.merge(moteconfig);
 						em.getTransaction().commit();

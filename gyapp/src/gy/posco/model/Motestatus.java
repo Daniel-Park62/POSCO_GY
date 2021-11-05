@@ -31,7 +31,7 @@ public class Motestatus  {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private short pkey;
 
-	private String mmgb;
+	private String mmgb = "1";
 	
 	private short seq ;
 	private short bno ;
@@ -39,8 +39,8 @@ public class Motestatus  {
 	private short swseq ;
 	
 	private short stand;
-	private String loc;
-	private String tb;
+	private String loc = "I";
+	private String tb  = "T";
 	
 	@Column(updatable=false, insertable=false)
 	private short act;

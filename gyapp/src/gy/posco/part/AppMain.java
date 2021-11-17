@@ -110,12 +110,12 @@ public class AppMain extends ApplicationWindow {
 		appmain = this;
 		img_top = AppMain.getMyimage("dashboard_t.png");
 		img_topr = AppMain.getMyimage("category.png");
-		img_act = AppMain.resizeImg(AppMain.getMyimage("icon_active.png"), 30, 30);
-		img_inact = AppMain.resizeImg(AppMain.getMyimage("icon_inactive.png"), 30, 30);
-		img_discon = AppMain.resizeImg(AppMain.getMyimage("icon_discon.png"), 30, 30);
-		img_danger = AppMain.resizeImg(AppMain.getMyimage("icon_danger.png"), 30, 30);
-		img_warn = AppMain.resizeImg(AppMain.getMyimage("icon_warn.png"), 30, 30);
-		img_lowb = AppMain.resizeImg(AppMain.getMyimage("lowbatt.png"), 30, 30);
+		img_act = AppMain.resizeImg(AppMain.getMyimage("icon_active.png"), 25, 25);
+		img_inact = AppMain.resizeImg(AppMain.getMyimage("icon_inactive.png"), 25, 25);
+		img_discon = AppMain.resizeImg(AppMain.getMyimage("icon_discon.png"), 25, 25);
+		img_danger = AppMain.resizeImg(AppMain.getMyimage("icon_danger.png"), 25, 25);
+		img_warn = AppMain.resizeImg(AppMain.getMyimage("icon_warn.png"), 25, 25);
+		img_lowb = AppMain.resizeImg(AppMain.getMyimage("lowbatt.png"), 25, 25);
 //		addStatusLine();
 	}
 
@@ -129,13 +129,13 @@ public class AppMain extends ApplicationWindow {
 		}
 		List<String> listStand = em
 				.createNativeQuery(
-						"SELECT cast(m.stand as char)   FROM motestatus m where m.gubun = 'S' and m.spare = 'N' group by m.stand ")
+						"SELECT cast(m.stand as char)   FROM motestatus m where m.mmgb = 1 and m.gubun = 'S' and m.spare = 'N' group by m.stand ")
 				.getResultList();
 
 		stand = listStand.toArray(new String[0]);
 
 		List<Object[]> listSno = em.createNativeQuery(
-				"select lpad(m.seq, 2,' '),lpad(m.bno,2,' ') from Motestatus m where m.gubun = 'S' and m.spare = 'N' order by m.seq")
+				"select lpad(m.seq, 2,' '),lpad(m.bno,2,' ') from Motestatus m where m.mmgb = 1 and m.gubun = 'S' and m.spare = 'N' order by m.seq ")
 				.getResultList();
 
 		sno = listSno.stream().map(a -> a[0].toString()).sorted().toArray(String[]::new);
@@ -282,7 +282,7 @@ public class AppMain extends ApplicationWindow {
 //		new RealChart(comp1_2, SWT.NONE);
 //		new SensorPos(comp1_2, SWT.NONE);
 
-		sashForm.setWeights(new int[] { 18, 90 });
+		sashForm.setWeights(new int[] { 15, 90 });
 
 		cur_comp.setToolTipText("DashBoard");
 		thread1 = new MyThread(Display.getCurrent(), MOTECNF.getMeasure() * 1000);
@@ -541,7 +541,11 @@ public class AppMain extends ApplicationWindow {
 		ldawin.setLayoutData(new GridData(SWT.CENTER, SWT.BOTTOM, true, true));
 
 	}
-
+	
+	public String getChocknm(int chock) {
+		return "" ;
+	}
+	
 	public static int sendReload() {
 
 		String s = System.getenv("MONIP");

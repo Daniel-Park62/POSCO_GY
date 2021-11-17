@@ -242,17 +242,17 @@ function insTemp(con) {
               let a = ws_ss[i][6] * 2 - 1 ;
               vrtd1 = rtags[a -1] / 100;
               vtemp = rtags[a] / 100;
-            } else if (ix < 52) {
+            } else if (ix < 53) {
               let a = Math.abs(43 - ix) * 4 + 84 ;
               vrtd1 = rtags[a] / 100;
               vrtd2 = rtags[a+1] / 100;
               vrtd3 = rtags[a+2] / 100;
               vtemp = rtags[a+3] / 100;
             } else continue ;
-            if ( isNaN(vrtd1) || vrtd1 > 600 ) vrtd1 = 0 ;
-            if ( isNaN(vrtd2) || vrtd2 > 600 ) vrtd2 = 0 ;
-            if ( isNaN(vrtd3) || vrtd3 > 600 ) vrtd3 = 0 ;
-            if ( isNaN(vtemp) || vtemp > 600 ) vtemp = 0 ;
+            if ( isNaN(vrtd1) || vrtd1 > 160 || vrtd1 == 0.09) vrtd1 = 0 ;
+            if ( isNaN(vrtd2) || vrtd2 > 160 || vrtd2 == 0.09) vrtd2 = 0 ;
+            if ( isNaN(vrtd3) || vrtd3 > 160 || vrtd3 == 0.09) vrtd3 = 0 ;
+            if ( isNaN(vtemp) || vtemp > 160 || vtemp == 0.09) vtemp = 0 ;
             motearr.push(['1', ws_ss[i][6],  ws_ss[i][2] ,ws_ss[i][0],ws_ss[i][3], vrtd1,vrtd2,vrtd3, vtemp, tm] ) ;
             // con.query('INSERT INTO moteinfo ( mmgb, seq, stand, act, batt, rtd1,rtd2,rtd3,temp, tm ) value (?,?,?,?,?,?,?,?,?,?) ',
             //   ['1', ws_ss[i][6],  ws_ss[i][2] ,ws_ss[i][0],ws_ss[i][3], vrtd1,vrtd2,vrtd3, vtemp, tm])
@@ -314,8 +314,8 @@ function insTemp(con) {
               let a = ix * 2 - 1 ;
               vrtd1 = rtags[a -1] / 100;
               vtemp = rtags[a] / 100;
-              if ( isNaN(vrtd1) || vrtd1 > 600 ) vrtd1 = 0 ;
-              if ( isNaN(vtemp) || vtemp > 600 ) vtemp = 0 ;
+              if ( isNaN(vrtd1) || vrtd1 > 160 || vrtd1 == 0.09) vrtd1 = 0 ;
+              if ( isNaN(vtemp) || vtemp > 160 || vtemp == 0.09) vtemp = 0 ;
   
               motearr.push( ['2', ds_ss[i][6], ds_ss[i][2], ds_ss[i][0], ds_ss[i][3], vrtd1,vrtd2,vrtd3, vtemp, tm]) ;
             } 
@@ -353,8 +353,8 @@ async function main()  {
   console.log("** 4PCM RM Roll 데이터수집 start **") ;
   setInterval(getDevs, 2000, con);
 
-  // mainto = setTimeout(main_loop, nextt - moment());
-  mainto = setInterval(main_loop, MEAS * 1000 );
+  mainto = setTimeout(main_loop, 2000);
+  // mainto = setInterval(main_loop, MEAS * 1000 );
   
   setInterval(() => {
     con.getConnection()
@@ -378,7 +378,7 @@ async function main()  {
        conn.end() ;
        })
      }, 600000) ;
-     
+  return "";
 }
 
 let csec = moment().get('second');
@@ -390,17 +390,14 @@ function main_loop() {
   // console.info(nextt) ;
   // let tm1 = moment();
   // await getDevs();
-  setTimeout(() => {
-        insTemp(con) ;
-    }    ,nextt - moment() ) ;
-  
+  setImmediate(insTemp,con) ;
   // await sleep( (MEAS -2) * 1000  );
   
   csec = moment().get('second');
   nextt = moment(moment().set({ 'second': Math.ceil(csec / MEAS) * MEAS, 'millisecond': 0 }));
   
   // console.log(nextt.format("HH:mm:ss")) ;
-  // mainto = setTimeout(main_loop, nextt - moment());
+  mainto = setTimeout(main_loop, nextt - moment());
 }
 
 async function main2_loop() {

@@ -245,7 +245,7 @@ public class ViewAlert extends Dialog {
         if (gb ==  1)
         	qstr = "select t from Motehist t, Moteconfig c where t.act = 2 and t.batt > 0 and t.batt < c.batt and t.tm between ?1 and ?2  order by t.tm desc" ;
         else 
-        	qstr = "select t from Motehist t where t.tempD <= t.temp and t.tm between ?1 and ?2 order by t.tm desc" ;
+        	qstr = "select t from Motehist t where t.tempD < t.temp and t.tm between ?1 and ?2 order by t.tm desc" ;
 		tempList = em.createQuery(qstr ,Motehist.class)
 				.setParameter(1,  fd)
 				.setParameter(2,  td )
@@ -292,7 +292,7 @@ public class ViewAlert extends Dialog {
 	    case 1:
 	    	return dateFmt.format( mote.getTm() ) ;
 	    case 2:
-	    	return mote.getBno()+"";
+	    	return mote.getChocknm();
 	    case 3:
 	    	return mote.getSeq()+"";
 	    case 4:

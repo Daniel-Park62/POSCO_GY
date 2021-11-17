@@ -35,7 +35,7 @@ public class NewMoteDlg extends Dialog {
 	private Text txtBno ;
 	private Text txtDesc ;
 	private CDateTime cdate ;
-	private Button buttonS , buttonR , btnNo, btnYes, btnWS, btnDS, btnIMR, btnWR, btnBUR, btnTOP, btnBOTTOM;
+	private Button buttonS , buttonR , btnNo, btnYes, btnWS, btnDS, btnIMR, btnWR, btnBUR, btnTOP, btnBOTTOM , btnCnt, btnUCnt ;
 	private Spinner spstand ;
 	private DateFormat dateFmt1 = new SimpleDateFormat("yyyy-MM-dd");	
 	final Font font = SWTResourceManager.getFont("Calibri", 14, SWT.NORMAL);
@@ -137,7 +137,25 @@ public class NewMoteDlg extends Dialog {
         buttonR = new Button(genderGroup, SWT.RADIO);
         buttonR.setText("Repeater");
         buttonR.setFont(font);
+
+        label = new Label(container, SWT.NONE);
+        label.setText("접촉구분:");
+        label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+        label.setFont(fonth);
+        // Group
+        Group  cntGrp = new Group (container, SWT.NONE);
+        cntGrp.setLayout(new RowLayout(SWT.HORIZONTAL));
+        cntGrp.setFont(new Font(null, "", 1, SWT.NORMAL));
+ 
+        btnCnt = new Button(cntGrp, SWT.RADIO);
+        btnCnt.setText("접촉");        
+        btnCnt.setFont(font);
+        btnCnt.setSelection(true) ;
         
+        btnUCnt = new Button(cntGrp, SWT.RADIO);
+        btnUCnt.setText("비접촉");
+        btnUCnt.setFont(font);
+
         Label label_1 = new Label(container, SWT.NONE);
         label_1.setFont(fonth);
         label_1.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -260,6 +278,7 @@ public class NewMoteDlg extends Dialog {
     	mote.setStand((short) spstand.getSelection() );
     	mote.setLoc(btnIMR.getSelection() ? "I" : btnWR.getSelection() ? "W" : "B") ;
     	mote.setTb(btnTOP.getSelection() ? "T" : "B");
+    	mote.setCntgb((short)(btnCnt.getSelection() ? 0 : 1));
     	AppMain.sendReload() ;
         super.okPressed();
     }
@@ -296,6 +315,8 @@ public class NewMoteDlg extends Dialog {
 	    btnWR.setSelection(mote.getLoc().equals("W"));
 	    btnTOP.setSelection(mote.getTb().equals("T"));
 	    btnBOTTOM.setSelection(mote.getTb().equals("B"));
+	    btnCnt.setSelection(mote.getCntgb() == 0 );
+	    btnUCnt.setSelection(mote.getCntgb() != 0 );
         
 	}
 }

@@ -33,6 +33,10 @@ public class Motehist  {
 	private short bno;
 	private short cntgb;
 	private short swseq ;
+	private String descript ;
+	public String getDescript() {
+		return this.descript == null ? "" : this.descript;
+	}
 	
 	public short getSwseq() {
 		return swseq;
@@ -49,6 +53,10 @@ public class Motehist  {
 	private short stand;
 	private String loc;
 	private String tb;
+	private String chocknm;
+	public String getChocknm() {
+		return this.chocknm == null ? "" : this.chocknm;
+	}
 
 	@Column(name="temp_d")
 	private float tempD;
@@ -145,9 +153,28 @@ public class Motehist  {
 
 	public int getStatus() {
 		int sts = 0 ;
-		if ( rtd1 > tempD ) 
+
+		if ( rtd1>0 && rtd1 > tempD ) 
 			sts = 2 ;
-		else if ( rtd1 > tempW )
+		else if ( rtd1>0 && rtd1 > tempW )
+			sts = 1 ;
+		return sts ;
+	}
+	public int getStatus2() {
+		int sts = 0 ;
+
+		if ( rtd2>0 && rtd2 > tempD ) 
+			sts = 2 ;
+		else if ( rtd2>0 && rtd2 > tempW )
+			sts = 1 ;
+		return sts ;
+	}
+	public int getStatus3() {
+		int sts = 0 ;
+
+		if ( rtd3>0 && rtd3 > tempD ) 
+			sts = 2 ;
+		else if ( rtd3>0 && rtd3 > tempW )
 			sts = 1 ;
 		return sts ;
 	}

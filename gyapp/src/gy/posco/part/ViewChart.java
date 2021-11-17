@@ -39,11 +39,13 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
@@ -87,6 +89,7 @@ public class ViewChart {
 	private DateText  fromDate, toDate ;
 	private TimeText fromTm,  toTm ;
 	private Text ftemp, ttemp ; 
+	private Button  btnWS, btnDS;
 	
 	public ViewChart(Composite parent, int style, String[] bnos, String fdt ) throws InterruptedException {
 		this(parent, style);
@@ -125,13 +128,26 @@ public class ViewChart {
 		lticon.setFont( SWTResourceManager.getFont("Tahoma", 22, SWT.BOLD ) );
     	
 		Composite composite_2 = new Composite(parent, SWT.NONE);
-		GridLayout gl_in = new GridLayout(14,false);
+		GridLayout gl_in = new GridLayout(16,false);
 		gl_in.marginRight = 50;
 		gl_in.marginLeft = 65;
 		
 		composite_2.setLayout(gl_in);
 		GridData gd_in = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd_in.heightHint = 50;
+
+        Group  rGroup0 = new Group (composite_2, SWT.NONE);
+        rGroup0.setLayout(new RowLayout(SWT.HORIZONTAL));
+        rGroup0.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
+    	btnWS = new Button(rGroup0, SWT.RADIO);
+    	btnWS.setText("W/S ");
+    	btnWS.setFont(font21);
+    	btnWS.setSelection(true);
+    	btnDS = new Button(rGroup0, SWT.RADIO);
+    	btnDS.setText("D/S");
+    	btnDS.setFont(font21);
+    	btnDS.setSelection(false);
+
 
 		composite_2.setLayoutData(gd_in);
 		{
@@ -454,7 +470,8 @@ public class ViewChart {
 		}
 		
 		refreshData(sfrom, sto) ;
-		
+		String smmgb = " and mmgb = '" + ( btnWS.getSelection() ? "1" : "2") + "'" ;
+
     	String sdt = ymd.format( Timestamp.valueOf(sfrom) ) ;
 		String tdt = ymd.format( Timestamp.valueOf(sto) ) ;
 
@@ -463,7 +480,7 @@ public class ViewChart {
 //		jlist.addAll( Arrays.asList( id_list.getSelection()) ) ;
 		JSONObject jo = new JSONObject() ;
 		jo.put("gb", gb == 0 ? "bno":"seq") ;
-		jo.put("cond", "seq in (" + ids + ")") ;
+		jo.put("cond", "seq in (" + ids + ")" + smmgb ) ;
 		jo.put("ftemp", ftemp.getText()) ;
 		jo.put("ttemp", ttemp.getText());
 		jo.put("ftm", sdt) ;

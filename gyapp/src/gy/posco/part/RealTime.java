@@ -481,7 +481,7 @@ public class RealTime  {
 		    case 1:
 		    	return dateFmt.format( mote.getTm() ) ;
 		    case 2:
-		    	return mote.getBno()+"";
+		    	return mote.getChocknm();
 		    case 3:
 		    	return mote.getSeq()+"";
 		    case 4:

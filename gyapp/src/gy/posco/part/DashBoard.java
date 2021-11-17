@@ -1,15 +1,16 @@
 package gy.posco.part;
 
 
-import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
-import javax.persistence.TemporalType;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -47,10 +48,11 @@ public class DashBoard {
 //    DateFormat dateFmt2 = new SimpleDateFormat("HH:mm:ss");
     Font font1 = SWTResourceManager.getFont("HY견고딕", 24 , SWT.BOLD ) ;
     Font font2 = SWTResourceManager.getFont("HY견고딕", 14, SWT.NORMAL);
-    Font font12 = SWTResourceManager.getFont("맑은 고딕", 11, SWT.BOLD ) ;
+    Font font12 = SWTResourceManager.getFont("맑은 고딕", 11, SWT.NORMAL ) ;
     Font fontT = SWTResourceManager.getFont("Tahoma", 20, SWT.NORMAL  ) ;
     Thread dsThread ;
-    Dashb dashb1, dashb2 ;
+
+    Standcl[] standcl = new Standcl[5];
 	List<Motestatus > motelist ;
 
 	int activeCnt = 0;
@@ -70,7 +72,6 @@ public class DashBoard {
 		
 		Composite composite = new Composite(parent, SWT.NONE);
 		
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout gl_composite = new GridLayout(1, false);
 		gl_composite.marginWidth = 0;
 		gl_composite.marginHeight = 0;
@@ -183,11 +184,17 @@ public class DashBoard {
 			
 		});
 
-		Composite composite_2 = new Composite(composite, SWT.BORDER);
-		GridLayoutFactory.fillDefaults().margins(15, -1).spacing(20, 20).applyTo(composite_2);
-		composite_2.setLayoutData(new GridData(GridData.FILL_BOTH));
-		dashb1 = new Dashb(composite_2,"1") ;
-		dashb2 = new Dashb(composite_2,"2") ;
+		Composite composite_2 = new Composite(composite, SWT.NONE);
+		GridLayoutFactory.fillDefaults().margins(15, 10).equalWidth(true).spacing(20, 20).numColumns(5).applyTo(composite_2);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(composite_2) ;
+//		composite_2.setBackground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
+		
+		for (int i=1;i<6;i++) {
+			Composite composite_3 = new Composite(composite_2, SWT.SHADOW_IN);
+			GridLayoutFactory.fillDefaults().applyTo(composite_3);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(composite_3) ;
+			standcl[i-1] = new Standcl(composite_3, i) ;
+		}
 		
 		refreshSensorList();
 		AppMain.appmain.callf = new IcallFunc() {
@@ -199,8 +206,6 @@ public class DashBoard {
 
 			@Override
 			public void finalFunc() {
-				// TODO Auto-generated method stub
-//				dsThread.interrupt();
 			}
 		};
 		
@@ -219,233 +224,190 @@ public class DashBoard {
 
 	}
 	
-	CLabel[] cltit = new CLabel[5];
-	CLabel[] clvtit = new CLabel[4];
-	private class Dashb {
-		String[] sname = {"BUR ","IMR ","WR ","비접촉 "} ;
-		String sv_mmgb = "1" ;
-		CLabel[][] clt = new CLabel[5][10] ;
-		CLabel[][] clb = new CLabel[5][10] ;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") ;
-		public void queryData() {
-					
-			List<Moteinfo> moteinfo 
-			= (List<Moteinfo>) em.createQuery("select m from Moteinfo m where m.mmgb = ?1 and m.tm = ?2 and m.stand > 0 ", Moteinfo.class)
-				.setParameter(1, sv_mmgb)
-				.setParameter(2, time_c) 
-				.getResultList() ;
-			List<Moteinfo> motemax 
-			= (List<Moteinfo>) em.createNativeQuery("select m.pkey, m.mmgb,m.seq, m.cntgb, m.stand, m.loc, m.tb, m.act"
-					+ ", temp_d, temp_w, max(m.rtd1) rtd1, max(m.rtd2) rtd2, max(m.rtd3) rtd3, max(m.temp) temp "
-					+ " from vMoteinfo m where "
-					+ "m.mmgb = ?1 and m.tm between (?2 - interval 1 hour) and ?3  and m.stand > 0 group by mmgb, seq ", Moteinfo.class)
-				.setParameter(1, sv_mmgb)
-				.setParameter(2, time_c) 
-				.setParameter(3, time_c) 
-				.getResultList() ;
-			for(Moteinfo mote: moteinfo) {
-				int i,j ;
+	private class Standcl {
+		Image img_r = AppMain.getMyimage("Roller_W.png");
 
-				if ( mote.getStand() < 1) continue ;
-				Color cl = mote.getStatus() == 2 ? SWTResourceManager.getColor(SWT.COLOR_RED)
-							: SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE);
-				if (mote.getCntgb() == 1) 
-					i = 3;
-				else
-					switch (mote.getLoc()) {
-					case "B":
-						i = 0 ;
-						break;
-					case "I":
-						i = 1 ;
-						break;
-					case "W":
-						i = 2 ;
-						break;
-					default:
-						i = 3;
-						break;
-					}
-				j = (mote.getStand() - 1) * 2 ;
+		private int stand ;
+		private CLabel[][] cltemp = new CLabel[2][6] ;
+		CLabel[] clt = new CLabel[2] ;
+		CLabel[] clb = new CLabel[2] ;
+		CLabel[] clunc = new CLabel[5] ;
+		CLabel[] clrw = new CLabel[2] ;
 
-				if (mote.getCntgb() == 1) {
-					clt[i][j].setText(String.format("%.0f", mote.getRtd1()));
-					clt[i][j].setForeground(cl) ;
-					clb[i][j].setText(String.format("%.0f", mote.getRtd2()));
-					if ( mote.getMmgb().equals("1")) clt[4][j].setText(String.format("%.0f", mote.getRtd3()));
-				} else if (mote.getTb().equals("T") ) {
-//					System.out.println(mote.toString());
-					clt[i][j].setText(String.format("%.0f", mote.getRtd1())   );
-					clt[i][j].setForeground(cl) ;
-				} else {
-					clb[i][j].setText(String.format("%.0f", mote.getRtd1()));
-					clb[i][j].setForeground(cl) ;
-				}
-
-				if (mote.getAct() == 0) {
-					clvtit[i].setImage(AppMain.img_inact);
-					cltit[mote.getStand() -1].setImage(AppMain.img_inact);
-				} else if (mote.getStatus() == 1) {
-					clvtit[i].setImage(AppMain.img_warn);
-					cltit[mote.getStand() -1].setImage(AppMain.img_warn);
-				} else if (mote.getStatus() == 2){
-					cltit[mote.getStand() -1].setImage(AppMain.img_danger);
-					clvtit[i].setImage(AppMain.img_danger);
-				} else if (mote.getBatt() < AppMain.MOTECNF.getBatt()) {
-					clvtit[i].setImage(AppMain.img_lowb);
-					cltit[mote.getStand() -1].setImage(AppMain.img_lowb);
-				} else {
-					clvtit[i].setImage(AppMain.img_act);
-					cltit[mote.getStand() -1].setImage(AppMain.img_act);
-					
-				}
-				
-			}
-			for(Moteinfo mote: motemax) {
-				int i,j ;
-				if ( mote.getStand() < 1) continue ;
-				Color cl = mote.getStatus() == 2 ? SWTResourceManager.getColor(SWT.COLOR_RED)
-							: SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE);
-				if (mote.getCntgb() == 1) 
-					i = 3;
-				else
-					switch (mote.getLoc()) {
-					case "B":
-						i = 0 ;
-						break;
-					case "I":
-						i = 1 ;
-						break;
-					case "W":
-						i = 2 ;
-						break;
-					default:
-						i = 3;
-						break;
-					}
-				j = (mote.getStand() - 1) * 2 + 1 ;
-
-				if (mote.getCntgb() == 1) {
-					clt[i][j].setText(String.format("%.0f", mote.getRtd1()));
-					clt[i][j].setForeground(cl) ;
-					clb[i][j].setText(String.format("%.0f", mote.getRtd2()));
-					if ( mote.getMmgb().equals("1")) clt[4][j].setText(String.format("%.0f", mote.getRtd3()));
-				} else if (mote.getTb().equals("T") ) {
-					clt[i][j].setText(String.format("%.0f", mote.getRtd1()));
-					clt[i][j].setForeground(cl) ;
-				} else {
-					clb[i][j].setText(String.format("%.0f", mote.getRtd1()));
-					clb[i][j].setForeground(cl) ;
-				}
-
-				if (mote.getAct() == 0) {
-					clvtit[i].setImage(AppMain.img_inact);
-					if ( cltit[mote.getStand() -1] != null ) cltit[mote.getStand() -1].setImage(AppMain.img_inact);
-				} else if (mote.getStatus() == 1) {
-					clvtit[i].setImage(AppMain.img_warn);
-					cltit[mote.getStand() -1].setImage(AppMain.img_warn);
-				} else if (mote.getStatus() == 2){
-					cltit[mote.getStand() -1].setImage(AppMain.img_danger);
-					clvtit[i].setImage(AppMain.img_danger);
-				} else if (mote.getBatt() < AppMain.MOTECNF.getBatt()) {
-					clvtit[i].setImage(AppMain.img_lowb);
-					cltit[mote.getStand() -1].setImage(AppMain.img_lowb);
-				} else {
-					clvtit[i].setImage(AppMain.img_act);
-					cltit[mote.getStand() -1].setImage(AppMain.img_act);
-					
-				}
-				
-			}
-		}
-		public Dashb(Composite comp, String mmgb) {
+		CLabel ctinfo, cninfo ;
+		String[] lname = {"TB","TI","TW","BW","BI","BB"} ;
+		Composite comp_s3 ;
+		public Standcl(Composite comp, int stand) {
+			this.stand = stand ;
+			CLabel clbl = new CLabel(comp, SWT.CENTER) ;
+			clbl.setText("STAND " + stand);
+			clbl.setFont(fontT);
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(clbl);
+			clbl = new CLabel(comp, SWT.CENTER) ;
+			clbl.setText("W/S ℃            D/S ℃  ");
+			clbl.setFont(font12);
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(clbl);
 			Composite comp_s = new Composite(comp, SWT.NONE) ;
-			GridLayoutFactory.fillDefaults().numColumns(6).equalWidth(false).spacing(5, 8).margins(25, -1).applyTo(comp_s);
-			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(comp_s);
-			sv_mmgb = mmgb ;
-			clvtit[0] = new CLabel(comp_s, SWT.BOTTOM);
-			clvtit[0].setFont(font1);
-			clvtit[0].setTopMargin(15);
-			if (mmgb.equals("1")) {
-				clvtit[0].setText("W/S");
-				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BOTTOM).span(1, 2).applyTo(clvtit[0]) ;
-				for (int i=0;i<5;i++) {
-					cltit[i] = new CLabel(comp_s, SWT.RIGHT_TO_LEFT|SWT.CENTER  );
-					cltit[i].setText(String.format("#%d", i+1)) ;
-					cltit[i].setImage(AppMain.img_act ) ;
-					cltit[i].setFont(fontT);
-					cltit[i].setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE)) ;
-					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BOTTOM).applyTo(cltit[i]) ;
+			GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).spacing(90, 25).margins(35, 35).applyTo(comp_s);
+			GridDataFactory.fillDefaults().hint(250, 500).align(SWT.FILL, SWT.FILL).applyTo(comp_s);
+			comp_s.setBackgroundImage(img_r);
+			clt[0] = new CLabel(comp_s, SWT.CENTER );
+			clt[1] = new CLabel(comp_s, SWT.CENTER );
+			clt[0].setFont(font12);
+			clt[1].setFont(font12);
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(clt[0]);
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(clt[1]);
+			clt[0].setBackground(SWTResourceManager.getColor( 255,248,206 )) ;
+			clt[0].setText("CBTW1");
+			clt[1].setText("CBTD1");
+			clt[1].setBackground(clt[0].getBackground()) ;
+			for(int i=0 ; i<6; i++)
+				for (int j=0;j<2; j++) {
+					cltemp[j][i] = new CLabel(comp_s, SWT.BORDER | SWT.CENTER );
+					cltemp[j][i].setText(" 0.0");
+					cltemp[j][i].setFont(font2);
+					cltemp[j][i].setBackground(SWTResourceManager.getColor(SWT.COLOR_GREEN)) ;
+					GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(cltemp[j][i]);
 				}
-				Label lbl ;
-				for (int i=0;i<5;i++) {
-					lbl = new Label(comp_s, SWT.LEFT  );
-					lbl.setText("     실시간        Max/hour ") ;
-					lbl.setFont(font12);
-					lbl.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_GRAY)) ;
-					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BOTTOM).hint(250,-1).applyTo(lbl) ;
-				}
-			} else {
-				clvtit[0].setText("D/S");
-				GridDataFactory.fillDefaults().span(6, 1).align(SWT.FILL, SWT.BOTTOM).applyTo(clvtit[0]) ;
+			clb[0] = new CLabel(comp_s, SWT.CENTER );
+			clb[1] = new CLabel(comp_s, SWT.CENTER );
+			clb[0].setFont(font12);
+			clb[1].setFont(font12);
+			clb[0].setBackground(clt[0].getBackground()) ;
+			clb[1].setBackground(clt[0].getBackground()) ;
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(clb[0]);
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(clb[1]);
+			clb[0].setText("CBBW1");
+			clb[1].setText("CBBD1");
+			Composite comp_s2 = new Composite(comp, SWT.NONE) ;
+			GridLayoutFactory.fillDefaults().numColumns(3).equalWidth(true).spacing(20, 5).margins(35, -1).applyTo(comp_s2);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(comp_s2);
+			for(int i=0;i<5;i++) {
+				clunc[i] = new CLabel(comp_s2, SWT.BORDER | SWT.CENTER );
+				clunc[i].setText(" 0.0");
+				clunc[i].setFont(font12);
+				clunc[i].setBackground(SWTResourceManager.getColor(SWT.COLOR_GREEN)) ;
+				GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(40, -1).applyTo(clunc[i]);
 			}
-			
-			for (int i=0; i< 4 ; i++) {
-				clvtit[i] = new CLabel(comp_s, SWT.RIGHT_TO_LEFT  ) ;
-				clvtit[i].setFont(fontT);
-				clvtit[i].setImage(AppMain.img_act ) ;
-				clvtit[i].setText( sname[i]) ;
-				clvtit[i].setBackground(SWTResourceManager.getColor(227, 235, 209) ) ;
-				clvtit[i].setRightMargin(30);
-				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(180, -1).applyTo(clvtit[i]) ;
-	
-				
-				for (int j=0; j<5; j++) {
-					Composite compl = new Composite(comp_s, SWT.NONE);
-					GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).applyTo(compl);
-					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(250, -1).applyTo(compl) ;
-					int k = j*2  ;
-					clt[i][k] = new CLabel(compl, SWT.NONE | SWT.CENTER) ;
-					clt[i][k].setText("0");
-					clt[i][k].setFont(font2);
-					clt[i][k].setBackground(SWTResourceManager.getColor(220, 230, 242) ) ;
-					clt[i][k].setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE)) ;
-					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(100, 30).applyTo(clt[i][k]) ;
-					clt[i][k+1] = new CLabel(compl, SWT.NONE| SWT.CENTER) ;
-					clt[i][k+1].setText("0");
-					clt[i][k+1].setFont(font2);
-					clt[i][k+1].setBackground(SWTResourceManager.getColor(220, 230, 242) ) ;
-					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(100, 30).applyTo(clt[i][k+1]) ;
+			comp_s2.requestLayout();
+			comp_s3 = new Composite(comp, SWT.NONE) ;
+			GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).spacing(30, -1).margins(35, 10).applyTo(comp_s3);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(comp_s3);
 
-					clb[i][k] = new CLabel(compl, SWT.NONE| SWT.CENTER) ;
-					clb[i][k].setText("0");
-					clb[i][k].setFont(font2);
-					clb[i][k].setBackground(SWTResourceManager.getColor(242, 242, 242) ) ;
-					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(100, 30).applyTo(clb[i][k]) ;
-					clb[i][k+1] = new CLabel(compl, SWT.NONE| SWT.CENTER) ;
-					clb[i][k+1].setText("0");
-					clb[i][k+1].setFont(font2);
-					clb[i][k+1].setBackground(SWTResourceManager.getColor(242, 242, 242) ) ;
-					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(100, 30).applyTo(clb[i][k+1]) ;
-					if (mmgb.equals("1") && i == 3) {
-						clt[4][k] = new CLabel(compl, SWT.NONE | SWT.CENTER) ;
-						clt[4][k].setText("0");
-						clt[4][k].setFont(font2);
-						GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(100, 30).applyTo(clt[4][k]) ;
-						clt[4][k].setBackground(SWTResourceManager.getColor(220, 230, 242) ) ;
-						clt[4][k+1] = new CLabel(compl, SWT.NONE| SWT.CENTER) ;
-						clt[4][k+1].setText("0");
-						clt[4][k+1].setFont(font2);
-						GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(100, 30).applyTo(clt[4][k+1]) ;
-						clt[4][k+1].setBackground(SWTResourceManager.getColor(220, 230, 242) ) ;
+//			if (stand == 1) {
+//				Label lbl = new Label(comp_s3, SWT.NONE) ;
+//				lbl.setText("중계기");
+//				lbl.setFont(font12);
+//			}
+			for(int i=0;i<2;i++) {
+				clrw[i] = new CLabel(comp_s3,  SWT.CENTER );
+				clrw[i].setText("");
+				clrw[i].setFont(SWTResourceManager.getFont("Calibri", 8, SWT.NORMAL));
+				clrw[i].setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT) ) ;
+				clrw[i].setBackground(AppMain.img_inact ) ;
+				clrw[i].setForeground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
+				GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(25, 25).applyTo(clrw[i]);
+			}
+
+			comp_s3.layout();
+			
+			ctinfo = new CLabel(comp, SWT.NONE) ;
+			cninfo = new CLabel(comp, SWT.NONE) ;
+			
+			ctinfo.setText("");
+			cninfo.setText("");
+			ctinfo.setFont(font12);
+			cninfo.setFont(font12);
+			ctinfo.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_RED)) ;
+			cninfo.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_CYAN)) ;
+			GridLayoutFactory.fillDefaults().margins(40,-1).applyTo(ctinfo);
+			GridLayoutFactory.fillDefaults().margins(40,0).applyTo(cninfo);
+//			queryData() ;
+			
+		}
+		public int queryData() {
+
+			List<String> stemp = em.createNativeQuery("SELECT warn_desc FROM twarnhist WHERE gbn = 1 and stand = ?1  LIMIT 1")
+					.setParameter(1, this.stand)
+					.getResultList() ;
+				ctinfo.setText(stemp.size() == 0 ? "" : stemp.get(0) );
+
+			List<String> scomm = em.createNativeQuery("SELECT warn_desc FROM twarnhist WHERE gbn = 2 and stand = ?1  LIMIT 1")
+						.setParameter(1, this.stand)
+						.getResultList() ;
+				cninfo.setText(scomm.size() == 0 ? "" : scomm.get(0) );
+
+			moteinfo.stream().filter(h -> h.getStand() == stand ).forEach( mote -> {
+				int i,j ;
+
+				i = Integer.parseInt( mote.getMmgb()) - 1;
+				if (mote.getCntgb() == 0 ) {
+					j = Arrays.asList(lname).indexOf(mote.getTb() + mote.getLoc()) ;
+
+					if (i > 1 || j > 5 || i < 0 || j < 0) return ;
+					cltemp[i][j].setText(String.format("%.1f", mote.getRtd1()));
+					label_col_set(cltemp[i][j], mote.getAct() == 0 ? -1 : mote.getStatus());
+					if (j == 0 ) clt[i].setText( mote.getChocknm() ); 
+					if (j == 5 ) clb[i].setText( mote.getChocknm() );  
+				} else {
+					if (mote.getSeq() % 2 == 1) {
+						clunc[0].setText(String.format("%.1f", mote.getRtd1()));
+						clunc[1].setText(String.format("%.1f", mote.getRtd2()));
+						clunc[2].setText(String.format("%.1f", mote.getRtd3()));
+						label_col_set(clunc[0], mote.getAct() == 0 ? -1 : mote.getStatus());
+						label_col_set(clunc[1], mote.getAct() == 0 ? -1 : mote.getStatus2());
+						label_col_set(clunc[2], mote.getAct() == 0 ? -1 : mote.getStatus3());
+					} else {
+						clunc[3].setText(String.format("%.1f", mote.getRtd1()));
+						clunc[4].setText(String.format("%.1f", mote.getRtd2()));
+						label_col_set(clunc[3], mote.getAct() == 0 ? -1 : mote.getStatus());
+						label_col_set(clunc[4], mote.getAct() == 0 ? -1 : mote.getStatus2());
+
 					}
 				}
-			}
+		});
+
+//			List<Motestatus> motes 
+//			= (List<Motestatus>) em.createQuery("select m from Motestatus m where m.stand = ?1  and m.gubun = 'R' and m.spare = 'N' "
+//					, Motestatus.class)
+//				.setParameter(1, stand)
+//				.getResultList() ;
 			
+			motest.stream().filter(m -> m.getStand() == this.stand).forEach( ms -> {
+				int i = Integer.parseInt(ms.getMmgb()) - 1;
+				if (ms.getStatus() == 2){
+					clrw[i].setBackground(AppMain.img_danger);
+				} else if (ms.getStatus() == 1) {
+					clrw[i].setBackground(AppMain.img_warn);
+				} else if (ms.getStatus() == 2){
+					clrw[i].setForeground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
+					clrw[i].setBackground(AppMain.img_danger);
+				} else if (ms.getBatt() < AppMain.MOTECNF.getBatt()) {
+					clrw[i].setBackground(AppMain.img_lowb);
+				} else if (ms.getAct() == 0 ) {
+					clrw[i].setBackground(AppMain.img_inact);
+				} else {
+					clrw[i].setBackground(AppMain.img_act);
+				}
+				clrw[i].setText(ms.getSeq()+"");
+			});
+			return 1;
+//			comp_s3.requestLayout();
 		}
 		
+		void label_col_set(CLabel cbl, int sts){
+			Color cl = sts == 2 ? SWTResourceManager.getColor(SWT.COLOR_RED)
+					: sts == 1 ? SWTResourceManager.getColor(SWT.COLOR_YELLOW) 
+					: sts == -1 ? SWTResourceManager.getColor(221,221,221) : SWTResourceManager.getColor(SWT.COLOR_GREEN);
+			Color fcl = sts == 2 ? SWTResourceManager.getColor(SWT.COLOR_YELLOW)
+					: SWTResourceManager.getColor(SWT.COLOR_BLACK);
+			
+			cbl.setBackground(cl);
+			cbl.setForeground(fcl);
+			
+		}
 	}
-
+	
 	private class MyThread extends Thread {
 		private Display display = null;
 		MyThread(Display display ){
@@ -477,7 +439,8 @@ public class DashBoard {
 	}
 
     final DateFormat ymd = new SimpleDateFormat("yyyyMMddHHmmss");
-
+    List<Moteinfo> moteinfo ;
+    List<Motestatus> motest ;
 //	@SuppressWarnings("unchecked")
 	public void refreshSensorList() {
 	    
@@ -487,6 +450,22 @@ public class DashBoard {
 		
 		em.clear();
 		em.getEntityManagerFactory().getCache().evictAll();
+		
+		moteinfo 
+		= (List<Moteinfo>) em.createQuery("select m from Moteinfo m where m.tm = ?1 and m.stand between 1 and 5 ", Moteinfo.class)
+			.setParameter(1, time_c) 
+			.getResultList() ;
+
+		motest 
+		= (List<Motestatus>) em.createQuery("select m from Motestatus m where m.stand between 1 and 5 and m.gubun = 'R' and m.spare = 'N' "
+				, Motestatus.class)
+			.getResultList() ;
+
+		
+		for(int i=0;i<5;i++) {
+			standcl[i].queryData();
+		}
+
 		motelist = em.createQuery("select m from Motestatus m where m.spare = 'N'", Motestatus.class).getResultList() ;
 
 		activeCnt = 0;
@@ -513,8 +492,8 @@ public class DashBoard {
 		lblAlertActive.requestLayout();
 		lblAlertInactive.requestLayout();
 
-		dashb1.queryData();
-		dashb2.queryData();
+//		dashb1.queryData();
+//		dashb2.queryData();
 
 	}
 	

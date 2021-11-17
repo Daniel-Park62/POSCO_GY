@@ -1,5 +1,7 @@
-.class
+*.class
+*.zip
 *.exe
 *~
 */node_modules/
 /gymod/chart/code/
+*/bak/

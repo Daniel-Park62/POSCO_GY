@@ -66,10 +66,14 @@ public class AppMain extends ApplicationWindow {
 	public String[] stand; // = {"1T","1B","2T","2B","3T","3B"} ;
 	public String[] sno;
 	public String[] bno;
-	final public static Color colact = SWTResourceManager.getColor(49, 134, 255);
-	final public static Color colinact = SWTResourceManager.getColor(SWT.COLOR_DARK_GRAY);
+	final public static Color colstr = SWTResourceManager.getColor(204, 255, 255);
+//	final public static Color colact = SWTResourceManager.getColor(49, 134, 255);
+	final public static Color colact = SWTResourceManager.getColor(SWT.COLOR_GREEN);
+	final public static Color colinact = SWTResourceManager.getColor(221,221,221);
+	final public static Color colinact2 = SWTResourceManager.getColor(SWT.COLOR_DARK_GRAY);
 	final public static Color collow = SWTResourceManager.getColor(245, 174, 0);
 	final public static Color colout = SWTResourceManager.getColor(SWT.COLOR_RED);
+	final public static Color colwarn = SWTResourceManager.getColor(SWT.COLOR_YELLOW);
 	final public static Color coltblh = SWTResourceManager.getColor(222, 239, 247);
 
 	final Font font2b = SWTResourceManager.getFont("Calibri", 14, SWT.BOLD);
@@ -115,7 +119,7 @@ public class AppMain extends ApplicationWindow {
 		img_discon = AppMain.resizeImg(AppMain.getMyimage("icon_discon.png"), 25, 25);
 		img_danger = AppMain.resizeImg(AppMain.getMyimage("icon_danger.png"), 25, 25);
 		img_warn = AppMain.resizeImg(AppMain.getMyimage("icon_warn.png"), 25, 25);
-		img_lowb = AppMain.resizeImg(AppMain.getMyimage("lowbatt.png"), 25, 25);
+		img_lowb = AppMain.resizeImg(AppMain.getMyimage("icon_lowb.png"), 25, 25);
 //		addStatusLine();
 	}
 
@@ -129,16 +133,16 @@ public class AppMain extends ApplicationWindow {
 		}
 		List<String> listStand = em
 				.createNativeQuery(
-						"SELECT cast(m.stand as char)   FROM motestatus m where m.mmgb = 1 and m.gubun = 'S' and m.spare = 'N' group by m.stand ")
+						"SELECT cast(m.stand as char)   FROM motestatus m where m.mmgb = '1' and m.gubun = 'S' and m.spare = 'N' group by m.stand ")
 				.getResultList();
 
 		stand = listStand.toArray(new String[0]);
 
 		List<Object[]> listSno = em.createNativeQuery(
-				"select lpad(m.seq, 2,' '),lpad(m.bno,2,' ') from Motestatus m where m.mmgb = 1 and m.gubun = 'S' and m.spare = 'N' order by m.seq ")
+				"select lpad(m.seq, 2,' '),lpad(m.bno,2,' ') from Motestatus m where m.mmgb = '1' and m.gubun = 'S' and m.spare = 'N' order by m.seq ")
 				.getResultList();
 
-		sno = listSno.stream().map(a -> a[0].toString()).sorted().toArray(String[]::new);
+		sno = listSno.stream().map(a -> a[0].toString()).distinct().sorted().toArray(String[]::new);
 		bno = listSno.stream().map(a -> a[1].toString()).distinct().sorted().toArray(String[]::new);
 
 		em.close();
@@ -245,7 +249,7 @@ public class AppMain extends ApplicationWindow {
 
 		composite_t.setLayout(new GridLayout(3, false));
 		Composite composite_t1 = new Composite(composite_t, SWT.NONE);
-		GridDataFactory.fillDefaults().hint(300, -1).align(SWT.FILL, SWT.CENTER).applyTo(composite_t1);
+		GridDataFactory.fillDefaults().hint(280, -1).align(SWT.FILL, SWT.CENTER).applyTo(composite_t1);
 		GridLayoutFactory.fillDefaults().numColumns(1).equalWidth(true).margins(5, -1).applyTo(composite_t1);
 		lblDate = new Label(composite_t1, SWT.NONE);
 		lblDate.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
@@ -260,10 +264,29 @@ public class AppMain extends ApplicationWindow {
 		Label ltit = new Label(composite_t, 0);
 		ltit.setImage(img_top);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(ltit);
+		
+		Composite compos_t2 = new Composite(composite_t, SWT.NONE);
+		GridLayoutFactory.fillDefaults().numColumns(6).equalWidth(true).extendedMargins(20, 10,10,10).spacing(20, 5).applyTo(compos_t2);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(compos_t2);
+		Color[] bcl = {colact, colinact,colstr,colout, colwarn, collow } ; 
+		String[] slblt = {"정상","비활성","미설치","위험","경고","배터리"} ;
+		for (int i=0;i<6;i++) {
+			ltit = new Label(compos_t2, SWT.BORDER);
+			ltit.setText(" ");
+			ltit.setBackground(bcl[i]);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(35, 35).grab(true, true).applyTo(ltit) ;
+		}
+		for (int i=0;i<6;i++) {
+			ltit = new Label(compos_t2, SWT.CENTER);
+			ltit.setText(slblt[i]);
+			ltit.setFont(SWTResourceManager.getFont("Calibri", 8, SWT.BOLD));
+			ltit.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(ltit);
+		}
 
-		ltit = new Label(composite_t, 0);
-		ltit.setImage(img_topr);
-		GridDataFactory.fillDefaults().align(SWT.RIGHT, SWT.CENTER).hint(300, -1).grab(true, true).applyTo(ltit);
+//		ltit = new Label(composite_t, 0);
+//		ltit.setImage(img_topr);
+//		GridDataFactory.fillDefaults().align(SWT.RIGHT, SWT.CENTER).hint(300, -1).grab(true, true).applyTo(ltit);
 
 		Label label = new Label(composite_t, SWT.SEPARATOR | SWT.HORIZONTAL);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(label);
@@ -583,7 +606,7 @@ public class AppMain extends ApplicationWindow {
 		String url = "http://" + s + ":9977?meas=" + meas;
 
 		try {
-			System.out.println(url);
+//			System.out.println(url);
 			URL obj = new URL(url);
 			URLConnection conn = obj.openConnection();
 			InputStream is = conn.getInputStream();

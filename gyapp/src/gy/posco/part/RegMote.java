@@ -306,7 +306,7 @@ public class RegMote {
 
 		group_t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 //		group_t.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-		GridLayout gl_g = new GridLayout(10, false);
+		GridLayout gl_g = new GridLayout(12, false);
 		gl_g.horizontalSpacing = 10;
 		gl_g.marginTop = 10;
 //		gl_composite_2.marginBottom = 5;
@@ -324,6 +324,7 @@ public class RegMote {
 		Label systext = new Label(group_t, SWT.BORDER);
 		systext.setText(" " + moteconfig.getSyscode() + " ");
 		systext.setFont(SWTResourceManager.getFont("Calibri", 14, SWT.BOLD));
+		systext.setSize(80, -1) ;
 
 		Label lblmeasure = new Label(group_t, SWT.NONE);
 		lblmeasure.setText("   온도정보수집간격 ");
@@ -342,7 +343,7 @@ public class RegMote {
 		spinner.setSize(120, -1);
 
 		Label lblbatt = new Label(group_t, SWT.NONE);
-		lblbatt.setText("   배터리경고기준 ");
+		lblbatt.setText("   배터리경고기준");
 		lblbatt.setFont(font3);
 		lblbatt.setAlignment(SWT.RIGHT);
 		lblbatt.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
@@ -356,6 +357,15 @@ public class RegMote {
 		spbatt.setFont(font3);
 		spbatt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		spbatt.setSize(180, -1);
+
+		lblbatt = new Label(group_t, SWT.NONE);
+		lblbatt.setText("  Stand자동수정");
+		lblbatt.setFont(font3);
+		lblbatt.setAlignment(SWT.RIGHT);
+		lblbatt.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
+		lblbatt.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+		Button btnauto = new Button(group_t, SWT.CHECK) ;
+		btnauto.setSelection(moteconfig.getUpdauto().equals("Y"));
 
 		/*
 		 * Label lblmeasure = new Label(group_t, SWT.NONE);
@@ -399,20 +409,16 @@ public class RegMote {
 					int lmeas = spinner.getSelection();
 					int lbatt = spbatt.getSelection();
 
-					if (AppMain.sendMeasur(lmeas + "") == 1) {
-						moteconfig.setSyscode(systext.getText());
-						moteconfig.setMeasure((short) lmeas);
-						moteconfig.setBatt(lbatt);
-						em.getTransaction().begin();
-						em.merge(moteconfig);
-						em.getTransaction().commit();
+					moteconfig.setSyscode(systext.getText());
+					moteconfig.setMeasure((short) lmeas);
+					moteconfig.setBatt(lbatt);
+					moteconfig.setUpdauto(btnauto.getSelection() ? "Y" :"N");
+					em.getTransaction().begin();
+					em.merge(moteconfig);
+					em.getTransaction().commit();
+					AppMain.sendMeasur("10") ; 
+					MessageDialog.openInformation(parent.getShell(), "Save Infomation", "수정되었습니다.");
 
-						MessageDialog.openInformation(parent.getShell(), "Save Infomation", "수정되었습니다.");
-					} else {
-						spinner.setSelection(moteconfig.getMeasure());
-						MessageDialog.openError(parent.getShell(), "Save Infomation", "처리중 오류가 발생하였습니다!");
-
-					}
 					passwordField.setText("");
 				}
 			});

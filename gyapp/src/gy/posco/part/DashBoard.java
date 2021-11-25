@@ -37,6 +37,7 @@ public class DashBoard {
 	Image img_1 = AppMain.getMyimage("dashboard_1.png");
 	Image img_c = AppMain.getMyimage("category.png");
 	Image img_c1 = AppMain.getMyimage("categoryicon_1.png");
+	Image img_l1 = AppMain.getMyimage("rollnm.png");
 
     Label lblApActive;
     Label lblApInactive;
@@ -83,7 +84,7 @@ public class DashBoard {
 		Composite composite_l = new Composite(composite, SWT.NONE);
 		composite_l.setLayout(new GridLayout(3,false) );
 		Composite composite_l1 = new Composite(composite_l, SWT.NONE);
-		composite_l1.setLayoutData(new GridData(1200, 100));
+		composite_l1.setLayoutData(new GridData(1600, 100));
 		
 		composite_l1.setBackgroundImage(img_1);
 		Label lblT = new Label(composite_l1,SWT.NONE) ;
@@ -136,17 +137,17 @@ public class DashBoard {
 		
 		Label btnlow = new Label(composite_l1, 0) ;
 		
-		btnlow.setBounds(880, iy+20, 50,60);
+		btnlow.setBounds(1150, iy+20, 50,60);
 		btnlow.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 //		btnlow.setFont( SWTResourceManager.getFont("Tahoma", 8, SWT.NORMAL ));
 
 		Label btnob = new Label(composite_l1, 0) ;
-		btnob.setBounds(960, iy+20, 50,60);
+		btnob.setBounds(1250, iy+20, 50,60);
 //		btnob.setFont( SWTResourceManager.getFont("Tahoma", 8, SWT.NORMAL ));
 		Label bsetup = new Label(composite_l1, 0) ;
-		bsetup.setBounds(1040, iy+20, 50,60);
+		bsetup.setBounds(1340, iy+20, 50,60);
 		Label bswitch = new Label(composite_l1, 0) ;
-		bswitch.setBounds(1120, iy+20, 50,60);
+		bswitch.setBounds(1430, iy+20, 50,60);
 		
 		btnlow.setCursor(AppMain.handc);
 		btnob.setCursor(AppMain.handc);
@@ -156,7 +157,7 @@ public class DashBoard {
 		btnlow.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(org.eclipse.swt.events.MouseEvent arg0) {
-				ViewAlert valert = new ViewAlert(parent.getShell(), 1 ) ;
+				ViewAlert valert = new ViewAlert(parent.getShell(), 0 ) ;
 				valert.open() ;
 			}
 		});
@@ -165,11 +166,21 @@ public class DashBoard {
 			
 			@Override
 			public void mouseUp(org.eclipse.swt.events.MouseEvent arg0) {
+				ViewAlert valert = new ViewAlert(parent.getShell(), 1 ) ;
+				valert.open() ;
+			}
+			
+		});
+		bswitch.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseUp(org.eclipse.swt.events.MouseEvent arg0) {
 				ViewAlert valert = new ViewAlert(parent.getShell(), 2 ) ;
 				valert.open() ;
 			}
 			
 		});
+
 		bsetup.addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -184,8 +195,19 @@ public class DashBoard {
 			
 		});
 
-		Composite composite_2 = new Composite(composite, SWT.NONE);
-		GridLayoutFactory.fillDefaults().margins(15, 10).equalWidth(true).spacing(20, 20).numColumns(5).applyTo(composite_2);
+		Composite composite2 = new Composite(composite, SWT.NONE);
+		GridLayoutFactory.fillDefaults().margins(10, 10).equalWidth(false).spacing(0, 0).numColumns(2).applyTo(composite2);
+		GridDataFactory.fillDefaults().applyTo(composite2) ;
+
+		Composite composite21 = new Composite(composite2, SWT.NONE);
+		GridLayoutFactory.fillDefaults().margins(0, 165).numColumns(1).equalWidth(false).applyTo(composite21);
+
+		Label lnm = new Label(composite21,SWT.NONE) ;
+		lnm.setImage(img_l1);
+		lnm.pack();
+		
+		Composite composite_2 = new Composite(composite2, SWT.NONE);
+		GridLayoutFactory.fillDefaults().margins(0, 5).equalWidth(true).spacing(20, 20).numColumns(5).applyTo(composite_2);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(composite_2) ;
 //		composite_2.setBackground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
 		
@@ -244,11 +266,11 @@ public class DashBoard {
 			clbl.setFont(fontT);
 			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(clbl);
 			clbl = new CLabel(comp, SWT.CENTER) ;
-			clbl.setText("W/S ℃            D/S ℃  ");
+			clbl.setText("W/S ℃            D/S ℃    ");
 			clbl.setFont(font12);
 			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(clbl);
 			Composite comp_s = new Composite(comp, SWT.NONE) ;
-			GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).spacing(90, 25).margins(35, 35).applyTo(comp_s);
+			GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).spacing(90, 25).margins(30, 35).applyTo(comp_s);
 			GridDataFactory.fillDefaults().hint(250, 500).align(SWT.FILL, SWT.FILL).applyTo(comp_s);
 			comp_s.setBackgroundImage(img_r);
 			clt[0] = new CLabel(comp_s, SWT.CENTER );
@@ -266,7 +288,7 @@ public class DashBoard {
 					cltemp[j][i] = new CLabel(comp_s, SWT.BORDER | SWT.CENTER );
 					cltemp[j][i].setText(" 0.0");
 					cltemp[j][i].setFont(font2);
-					cltemp[j][i].setBackground(SWTResourceManager.getColor(SWT.COLOR_GREEN)) ;
+					cltemp[j][i].setBackground(AppMain.colstr) ;
 					GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(cltemp[j][i]);
 				}
 			clb[0] = new CLabel(comp_s, SWT.CENTER );
@@ -286,7 +308,7 @@ public class DashBoard {
 				clunc[i] = new CLabel(comp_s2, SWT.BORDER | SWT.CENTER );
 				clunc[i].setText(" 0.0");
 				clunc[i].setFont(font12);
-				clunc[i].setBackground(SWTResourceManager.getColor(SWT.COLOR_GREEN)) ;
+				clunc[i].setBackground(AppMain.colstr) ;
 				GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(40, -1).applyTo(clunc[i]);
 			}
 			comp_s2.requestLayout();
@@ -336,6 +358,19 @@ public class DashBoard {
 						.setParameter(1, this.stand)
 						.getResultList() ;
 				cninfo.setText(scomm.size() == 0 ? "" : scomm.get(0) );
+			clt[0].setText("-");
+			clt[1].setText("-");
+			clb[0].setText("-");
+			clb[1].setText("-");
+			for(int i=0 ; i<6; i++)
+				for (int j=0;j<2; j++) {
+					cltemp[j][i].setText(" 0.0");
+					cltemp[j][i].setBackground(AppMain.colstr) ;
+				}
+			for(int i=0;i<5;i++) {
+				clunc[i].setText(" 0.0");
+				clunc[i].setBackground(AppMain.colstr) ;
+			}
 
 			moteinfo.stream().filter(h -> h.getStand() == stand ).forEach( mote -> {
 				int i,j ;
@@ -346,7 +381,8 @@ public class DashBoard {
 
 					if (i > 1 || j > 5 || i < 0 || j < 0) return ;
 					cltemp[i][j].setText(String.format("%.1f", mote.getRtd1()));
-					label_col_set(cltemp[i][j], mote.getAct() == 0 ? -1 : mote.getStatus());
+					label_col_set(cltemp[i][j], mote.getAct() == 0 ? -1 
+							: mote.getStatus() == 0 && mote.getBatt() < AppMain.MOTECNF.getBatt() ? -2 : mote.getStatus());
 					if (j == 0 ) clt[i].setText( mote.getChocknm() ); 
 					if (j == 5 ) clb[i].setText( mote.getChocknm() );  
 				} else {
@@ -354,9 +390,14 @@ public class DashBoard {
 						clunc[0].setText(String.format("%.1f", mote.getRtd1()));
 						clunc[1].setText(String.format("%.1f", mote.getRtd2()));
 						clunc[2].setText(String.format("%.1f", mote.getRtd3()));
-						label_col_set(clunc[0], mote.getAct() == 0 ? -1 : mote.getStatus());
-						label_col_set(clunc[1], mote.getAct() == 0 ? -1 : mote.getStatus2());
-						label_col_set(clunc[2], mote.getAct() == 0 ? -1 : mote.getStatus3());
+						label_col_set(clunc[0], mote.getAct() == 0 ? -1 
+						: mote.getStatus() == 0 && mote.getBatt() < AppMain.MOTECNF.getBatt() ? -2 : mote.getStatus());
+
+						label_col_set(clunc[1], mote.getAct() == 0 ? -1 
+						: mote.getStatus2() == 0 && mote.getBatt() < AppMain.MOTECNF.getBatt() ? -2 : mote.getStatus2());
+						label_col_set(clunc[2], mote.getAct() == 0 ? -1 
+						: mote.getStatus3() == 0 && mote.getBatt() < AppMain.MOTECNF.getBatt() ? -2 : mote.getStatus3());
+						
 					} else {
 						clunc[3].setText(String.format("%.1f", mote.getRtd1()));
 						clunc[4].setText(String.format("%.1f", mote.getRtd2()));
@@ -377,11 +418,9 @@ public class DashBoard {
 				int i = Integer.parseInt(ms.getMmgb()) - 1;
 				if (ms.getStatus() == 2){
 					clrw[i].setBackground(AppMain.img_danger);
+					clrw[i].setForeground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
 				} else if (ms.getStatus() == 1) {
 					clrw[i].setBackground(AppMain.img_warn);
-				} else if (ms.getStatus() == 2){
-					clrw[i].setForeground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
-					clrw[i].setBackground(AppMain.img_danger);
 				} else if (ms.getBatt() < AppMain.MOTECNF.getBatt()) {
 					clrw[i].setBackground(AppMain.img_lowb);
 				} else if (ms.getAct() == 0 ) {
@@ -396,9 +435,11 @@ public class DashBoard {
 		}
 		
 		void label_col_set(CLabel cbl, int sts){
-			Color cl = sts == 2 ? SWTResourceManager.getColor(SWT.COLOR_RED)
-					: sts == 1 ? SWTResourceManager.getColor(SWT.COLOR_YELLOW) 
-					: sts == -1 ? SWTResourceManager.getColor(221,221,221) : SWTResourceManager.getColor(SWT.COLOR_GREEN);
+			Color cl = sts == 2 ? AppMain.colout
+					: sts == 1 ? AppMain.colwarn  
+					: sts == -1 ? AppMain.colinact 
+					: sts == -2 ? AppMain.collow 
+					: SWTResourceManager.getColor(SWT.COLOR_GREEN);
 			Color fcl = sts == 2 ? SWTResourceManager.getColor(SWT.COLOR_YELLOW)
 					: SWTResourceManager.getColor(SWT.COLOR_BLACK);
 			

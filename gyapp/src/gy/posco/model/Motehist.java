@@ -179,9 +179,9 @@ public class Motehist  {
 		return sts ;
 	}
 	public String getLocNmlong() {
-		if (cntgb == 1)  return "비접촉" ;
+		if (cntgb == 1)   return "비접촉 #" + stand  ;
 		StringBuilder sb = new StringBuilder() ;
-		sb.append(stand + " Stand ");
+		sb.append("#"+ stand + " ");
 		sb.append(AppMain.getLocName(loc) + " " + tb) ;
 		
 		return sb.toString() ;

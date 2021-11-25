@@ -17,8 +17,13 @@ const gydb = require('./db/dbconn');
 const con = gydb.getPool() ;
 
 let MEAS = 10;
+let UPDAUTO = true;
 
 let svtime = moment().subtract(34, "s");
+const net = require('net');
+
+let ws_buffarr = new Array() ;
+let ds_buffarr = new Array() ;
 
 const ModbusRTU = require("modbus-serial");
 
@@ -36,34 +41,51 @@ process.on("message", async (dat) => {
   }
   dat.chgmeas *= 1;
   if ( typeof dat.chgmeas == 'number' ) {
-    MEAS = dat.chgmeas ;
-    console.log("Interval 변경:",MEAS) ;
-    clearTimeout(mainto) ;
-    mainto = setInterval( main_loop, MEAS * 1000 - 500) ;
+    con.getConnection( conn => {
+      conn.query("SELECT measure, batt, updauto FROM MOTECONFIG LIMIT 1")
+      .then(row => {
+        MEAS = row[0].measure;
+        BATTL = row[0].batt;
+        UPDAUTO = row[0].updauto == 'Y';
+      })
+      .catch(err => console.error(err) )
+      .finally(() => { 
+        console.info('time interval :' , MEAS, " Battery Limit :" , BATTL, UPDAUTO );
+        conn.end() ;
+        console.log("Interval 변경:",MEAS) ;
+        clearTimeout(mainto) ;
+        mainto = setInterval( main_loop, MEAS * 1000 - 500) ;
+      });
+
+    }) ;
+    ws_ss.forEach(ss => delete ss.Mac ) ;
+    ds_ss.forEach(ss => delete ss.Mac ) ;
   }
+  
 });
 
 function getMeasure() {
 
-   con.query("SELECT seq,act,bno, stand, batt , swseq, spare, gubun, cntgb FROM motestatus  where mmgb = '1' or cntgb = 1 ")
+   con.query("SELECT seq,act,bno, stand, batt , swseq, spare, gubun, cntgb, loc FROM motestatus  where mmgb = '1' ")
     .then(rows => { 
-      rows.forEach((e, i) => { ws_ss[i] = []; ws_ss[i] = [e.act, e.bno, e.stand, e.batt, e.spare, e.gubun, e.seq, e.swseq ] });
+      rows.forEach((e, i) => { ws_ss[i] = []; ws_ss[i] = [e.act, e.bno, e.stand, e.batt, e.spare, e.gubun, e.seq, e.swseq, e.loc ] });
     })
     .catch(err => console.error(err));
 
-   con.query("SELECT seq,act,bno,stand, batt , swseq, spare, gubun FROM motestatus  where mmgb = '2' and cntgb = 0 ")
+   con.query("SELECT seq,act,bno,stand, batt , swseq, spare, gubun, loc FROM motestatus  where mmgb = '2' ")
     .then(rows => {
-      rows.forEach((e, i) => { ds_ss[i] = []; ds_ss[i] = [e.act, e.bno, e.stand, e.batt, e.spare, e.gubun, e.seq, e.swseq ] });
+      rows.forEach((e, i) => { ds_ss[i] = []; ds_ss[i] = [e.act, e.bno, e.stand, e.batt, e.spare, e.gubun, e.seq, e.swseq, e.loc ] });
     })
     .catch(err => console.error(err));
 
-   con.query("SELECT measure, batt FROM MOTECONFIG LIMIT 1")
+   con.query("SELECT measure, batt, updauto FROM MOTECONFIG LIMIT 1")
     .then(row => {
       MEAS = row[0].measure;
       BATTL = row[0].batt;
+      UPDAUTO = row[0].updauto == 'Y';
     })
     .catch(err => MEAS = 10)
-    .finally(() => console.info('time interval :' + MEAS, " Battery Limit :" + BATTL));
+    .finally(() => console.info('time interval :' , MEAS, " Battery Limit :" , BATTL, UPDAUTO ));
   ;
    con.query("SELECT max(seq)  as ssnum FROM motestatus where spare = 'N' and GUBUN = 'S' ")
     .then(rows => SSNUM = rows[0].ssnum)
@@ -120,7 +142,11 @@ function getDevs(con) {
         // console.log(mote);
         ws_ss.every((ss,i) => {
           if (ss[6] == d) {
-
+            if ( ss[5] == 'S' && ss.Mac == undefined  ) {
+              ss.Mac = mote.mac.replace(/:/gi,'');
+              ws_sensor_push(ss.Mac, ss[8] == 'B' ? ss[2] : 2 ) ;
+            }
+            if ( ss[0] == mote.act && ss[3] == vbatt)  return false ;
             ws_ss[i][0] = mote.act;
             // console.log(mote, ws_ss[i][0], ss[0]) ;
             if (mote.act > 0) {
@@ -175,7 +201,11 @@ function getDevs(con) {
         // console.log(mote);
         ds_ss.every((ss,i) => {
           if (ss[6] == d) {
-
+            if ( ss[5] == 'S'   && ss.Mac == undefined ) {
+              ss.Mac = mote.mac.replace(/:/gi,'');
+              ds_sensor_push(ss.Mac, ss[8] == 'B' ? ss[2] : 2) ;
+            }
+            if ( ss[0] == mote.act && ss[3] == vbatt)  return false ;
             ds_ss[i][0] = mote.act;
 
             if (mote.act > 0) {
@@ -227,15 +257,18 @@ function insTemp(con) {
             await client.readHoldingRegisters(i*8+1,8)
             .then( d => {
               let mdata = new Uint16Array(d.data) ;
-
-              if (mdata[3] > 0 && mdata[3] != ws_ss[i][2] ) {
+              if (ws_ss[i][8] == 'B' && mdata[3] != ws_ss[i][2] ) {
                 ws_ss[i][2] = mdata[3] ;
-                con.query("UPDATE motestatus set stand = ? where mmgb = '1' and seq = ?", [ws_ss[i][2], ws_ss[i][6]]);
+                ws_sensor_push(ws_ss[i].Mac, ws_ss[i][2]) ;
+                client.writeRegister(i*8+3, mdata[3] == 0 ? 9999 : MEAS ) 
+                .catch( e => console.error(e));
+                if (UPDAUTO) con.query("UPDATE motestatus set stand = ? where mmgb = '1' and seq = ?", [ws_ss[i][2], ws_ss[i][6]]);
               }
               if (mdata[6] == 1 && ws_ss[i][7]  != mdata[7] || mdata[6] == 0 && ws_ss[i][7] > 0 ) {
                 ws_ss[i][7] = mdata[6] == 0 ? 0 : mdata[7] ;
                 con.query("UPDATE motestatus set swseq = ?  where mmgb = '1' and seq = ?", [ws_ss[i][7], ws_ss[i][6]]) ;
               }
+              
             });            
             let ix = ws_ss[i][7] > 0 ? ws_ss[i][7] : ws_ss[i][6] ;
             if (ix < 43)  {
@@ -249,10 +282,10 @@ function insTemp(con) {
               vrtd3 = rtags[a+2] / 100;
               vtemp = rtags[a+3] / 100;
             } else continue ;
-            if ( isNaN(vrtd1) || vrtd1 > 160 || vrtd1 == 0.09) vrtd1 = 0 ;
-            if ( isNaN(vrtd2) || vrtd2 > 160 || vrtd2 == 0.09) vrtd2 = 0 ;
-            if ( isNaN(vrtd3) || vrtd3 > 160 || vrtd3 == 0.09) vrtd3 = 0 ;
-            if ( isNaN(vtemp) || vtemp > 160 || vtemp == 0.09) vtemp = 0 ;
+            if ( isNaN(vrtd1) || vrtd1 > 327.67 || vrtd1 == 0.09) vrtd1 = 0 ;
+            if ( isNaN(vrtd2) || vrtd2 > 327.67 || vrtd2 == 0.09) vrtd2 = 0 ;
+            if ( isNaN(vrtd3) || vrtd3 > 327.67 || vrtd3 == 0.09) vrtd3 = 0 ;
+            if ( isNaN(vtemp) || vtemp > 327.67 || vtemp == 0.09) vtemp = 0 ;
             motearr.push(['1', ws_ss[i][6],  ws_ss[i][2] ,ws_ss[i][0],ws_ss[i][3], vrtd1,vrtd2,vrtd3, vtemp, tm] ) ;
             // con.query('INSERT INTO moteinfo ( mmgb, seq, stand, act, batt, rtd1,rtd2,rtd3,temp, tm ) value (?,?,?,?,?,?,?,?,?,?) ',
             //   ['1', ws_ss[i][6],  ws_ss[i][2] ,ws_ss[i][0],ws_ss[i][3], vrtd1,vrtd2,vrtd3, vtemp, tm])
@@ -300,9 +333,12 @@ function insTemp(con) {
             .then( d => {
               let mdata = new Uint16Array(d.data) ;
 
-              if (mdata[3] > 0 && mdata[3] != ds_ss[i][2] ) {
+              if (ds_ss[i][8] == 'B' && mdata[3] != ds_ss[i][2] ) {
                 ds_ss[i][2] = mdata[3] ;
-                con.query("UPDATE motestatus set stand = ? where mmgb = '2' and seq = ?", [ds_ss[i][2], ds_ss[i][6]]) ;
+                ds_sensor_push(ds_ss[i].Mac, ds_ss[i][2]) ;
+                client.writeRegister(i*8+3, mdata[3] == 0 ? 9999 : MEAS ) 
+                .catch( e => console.error(e));
+                if (UPDAUTO) con.query("UPDATE motestatus set stand = ? where mmgb = '2' and seq = ?", [ds_ss[i][2], ds_ss[i][6]]) ;
               }
               if (mdata[6] == 1 && ds_ss[i][7]  != mdata[7] || mdata[6] == 0 && ds_ss[i][7] > 0 ) {
                 ds_ss[i][7] = mdata[6] == 0 ? 0 : mdata[7] ;
@@ -314,8 +350,8 @@ function insTemp(con) {
               let a = ix * 2 - 1 ;
               vrtd1 = rtags[a -1] / 100;
               vtemp = rtags[a] / 100;
-              if ( isNaN(vrtd1) || vrtd1 > 160 || vrtd1 == 0.09) vrtd1 = 0 ;
-              if ( isNaN(vtemp) || vtemp > 160 || vtemp == 0.09) vtemp = 0 ;
+              if ( isNaN(vrtd1) || vrtd1 > 327.67 || vrtd1 == 0.09) vrtd1 = 0 ;
+              if ( isNaN(vtemp) || vtemp > 327.67 || vtemp == 0.09) vtemp = 0 ;
   
               motearr.push( ['2', ds_ss[i][6], ds_ss[i][2], ds_ss[i][0], ds_ss[i][3], vrtd1,vrtd2,vrtd3, vtemp, tm]) ;
             } 
@@ -350,7 +386,6 @@ async function main()  {
   // client.connectTCP(GWIP, { port: TAGPORT });
 
   async () => { while (ws_ss[1][0] == "undefined") await sleep(1000); }
-  console.log("** 4PCM RM Roll 데이터수집 start **") ;
   setInterval(getDevs, 2000, con);
 
   mainto = setTimeout(main_loop, 2000);
@@ -378,6 +413,14 @@ async function main()  {
        conn.end() ;
        })
      }, 600000) ;
+
+   setInterval(() => {
+    let buff = ws_buffarr.shift() ;
+    if (buff != undefined) setTimeout( ws_sensor_set,0,buff) ;
+    let buff2 = ds_buffarr.shift() ;
+    if (buff2 != undefined) setTimeout( ds_sensor_set,10, buff2) ;
+   }, 5000) ;
+  
   return "";
 }
 
@@ -418,3 +461,81 @@ process.on('uncaughtException', function (err) {
   console.error('uncaughtException 발생 : ' + err.stack);
 
 });
+
+function ws_sensor_push(mac, act ) {
+	//    if (act == -1) return ;
+		if (mac.indexOf("00000000") != -1) return;
+    let idx = ws_buffarr.findIndex( item => item.toString('hex').substr(0,16) == mac ) ;
+    if (idx > -1) ws_buffarr.splice(idx,1) ;
+    let buf1 = Buffer.alloc(14);
+    buf1.writeInt32LE(act != 0 ? MEAS : 9999,10);
+    buf1.write(mac,'hex');
+    buf1[8] = 1;
+    buf1[9] = 4;
+    ws_buffarr.push(buf1) ;
+	// console.info(" ws push :" , buf1.toString('hex') );
+}
+
+function ds_sensor_push(mac, act ) {
+	//    if (act == -1) return ;
+		if (mac.indexOf("00000000") != -1) return;
+    let idx = ds_buffarr.findIndex( item => item.toString('hex').substr(0,16) == mac ) ;
+    if (idx > -1) ds_buffarr.splice(idx,1) ;
+    let buf1 = Buffer.alloc(14);
+    buf1.writeInt32LE(act != 0 ? MEAS : 9999,10);
+    buf1.write(mac,'hex');
+    buf1[8] = 1;
+    buf1[9] = 4;
+    ds_buffarr.push(buf1) ;
+	// console.info(" ds push :" , buf1.toString('hex') );
+}
+
+function ws_sensor_set( buf1 ) {
+
+  let socket = net.connect( {port : 40000, host: GWIP_WS}, () => {
+//      console.info(buf1.toString('hex'));
+    socket.setNoDelay(true);
+    try {
+      let ret = socket.write(buf1) ;
+    } catch (e) {
+      console.log("ws socket write error :", e);
+      ws_buffarr.push(buf1) ;
+    }
+  } );
+  socket.on('data', function (data) {
+      console.log(" *** ws Server return data : " , data.toString('hex'), Date() );
+      // if (data[8] != 0)          buffarr.push(buf1) ;
+      socket.end();
+//	socket.end();
+  });
+  socket.on('error', function (err) {
+      // console.error(" *** ws Error : ", Date() ,buf1.toString('hex') , JSON.stringify(err));
+      ws_buffarr.push(buf1) ;
+  });
+
+}
+
+function ds_sensor_set( buf1 ) {
+
+  let socket = net.connect( {port : 40000, host: GWIP_DS}, () => {
+//      console.info(buf1.toString('hex'));
+    socket.setNoDelay(true);
+    try {
+      let ret = socket.write(buf1) ;
+    } catch (e) {
+      console.log("ds socket write error :", e);
+      ds_buffarr.push(buf1) ;
+    }
+  } );
+  socket.on('data', function (data) {
+      console.log(" *** ds Server return data : " , data.toString('hex'), Date() );
+      // if (data[8] != 0)          buffarr.push(buf1) ;
+      socket.end();
+//	socket.end();
+  });
+  socket.on('error', function (err) {
+      // console.error(" *** ds Error : ", Date() ,buf1.toString('hex') , JSON.stringify(err));
+      ds_buffarr.push(buf1) ;
+  });
+
+}

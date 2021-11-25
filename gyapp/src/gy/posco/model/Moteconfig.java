@@ -26,6 +26,8 @@ public class Moteconfig  {
 
 	private String syscode;
 
+	private String updauto;
+
 	private Moteconfig() {
 	}
 
@@ -59,6 +61,14 @@ public class Moteconfig  {
 
 	public void setSyscode(String syscode) {
 		this.syscode = syscode;
+	}
+
+	public String getUpdauto() {
+		return updauto;
+	}
+
+	public void setUpdauto(String updauto) {
+		this.updauto = updauto;
 	}
 
 }

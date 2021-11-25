@@ -50,6 +50,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.ibm.icu.util.Calendar;
 
 import gy.posco.model.Motehist;
+import gy.posco.model.Moteinfo;
 
 public class RealTime  {
 
@@ -81,7 +82,7 @@ public class RealTime  {
     private TableViewer tv;
     private DateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private DateFormat dateFmt1 = new SimpleDateFormat("yyyy-MM-dd");
-    private DateFormat timeFmt = new SimpleDateFormat("HH:mm:ss");
+    private DateFormat timeFmt = new SimpleDateFormat("HH:mm");
     private Combo cbddown ;
     private Cursor busyc = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
     private Cursor curc ;
@@ -228,7 +229,7 @@ public class RealTime  {
 		fromDate.setFont(font21);
 		fromDate.addMouseListener(madpt);
 		Calsel calsel = new Calsel(composite_2, SWT.NONE,fromDate) ;
-		TimeText fromTm = new TimeText(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		TimeText2 fromTm = new TimeText2(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
 		fromTm.setLayoutData(gdinput);
 		fromTm.setFont(font21);
 		{
@@ -243,7 +244,7 @@ public class RealTime  {
 		toDate.setFont(font21);
 		toDate.addMouseListener(madpt);
 		calsel = new Calsel(composite_2, SWT.NONE,toDate) ;
-		TimeText toTm = new TimeText(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		TimeText2 toTm = new TimeText2(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
 		toTm.setLayoutData(gdinput);
 		toTm.setFont(font21);
 
@@ -255,8 +256,8 @@ public class RealTime  {
 		bq.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String sfrom = fromDate.getText() + " " + fromTm.getText() ;
-				String sto = toDate.getText() + " " + toTm.getText() ;
+				String sfrom = fromDate.getText() + " " + fromTm.getText() + ":00";
+				String sto = toDate.getText() + " " + toTm.getText() + ":59" ;
 				try {
 					Timestamp.valueOf(sfrom) ;
 					Timestamp.valueOf(sto) ;
@@ -276,8 +277,8 @@ public class RealTime  {
 		bext.addSelectionListener( new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SimpleDateFormat sfmt = new SimpleDateFormat("yyMMdd_HH_mm_ss");
-				String sfrom = sfmt.format( Timestamp.valueOf(fromDate.getText() + " " + fromTm.getText()) ) ;
+				SimpleDateFormat sfmt = new SimpleDateFormat("yyMMdd_HH_mm");
+				String sfrom = sfmt.format( Timestamp.valueOf(fromDate.getText() + " " + fromTm.getText() + ":00" ) ) ;
 				AppMain.exportTable(tv, 0, "RM_Roll_Chock_Temperature_Data_"+ sfrom );
 			}
 		} ); 
@@ -318,8 +319,8 @@ public class RealTime  {
 	    	}
 	    });		
 		
-		String[] cols = { "WD", "날짜/시간", "Chock", "센서번호","장치위치","상태정보","온도","배터리", "상태내용"}; 
-		int[]    iw   = { 60,220, 80, 80, 180, 120, 120, 120, 200 };
+		String[] cols = { "WD", "센서번호", "Chock","장치위치","날짜/시간","상태정보","온도(℃)","배터리(v)", "상태내용"}; 
+		int[]    iw   = { 60, 80, 80, 180,220, 120, 120, 120, 200 };
 
 //		TableViewerColumn tvcol = new TableViewerColumn(tv, SWT.NONE | SWT.CENTER);
 		for (int i=0; i<cols.length; i++) {
@@ -360,12 +361,13 @@ public class RealTime  {
 	private void retriveData(String sfrom, String sto ) {
 		
 		try {
-			Timestamp ts_dt = Timestamp.valueOf(sfrom) ;
-			ts_dt = Timestamp.valueOf(sto) ;
+			fmdt = Timestamp.valueOf(sfrom) ;
+			todt = Timestamp.valueOf(sto) ;
 		} catch (Exception e2) {
 			MessageDialog.openError(parent.getShell(), "날짜확인", "날짜입력이 바르지 않습니다.") ;
 			return ;
 		}
+//		System.out.println(sfrom + " " + sto);
 		int gb = 0 ;
 		String qval = "";
 		if  (cbddown.getSelectionIndex() > 0) {
@@ -402,7 +404,7 @@ public class RealTime  {
 		
 		ArrayList<Motehist> tempList2 = new ArrayList<Motehist>();
         TypedQuery<Motehist> qMotes = em.createQuery("select t from Motehist t " 
-        		+ "where t.tm between :fmdt and :todt " + sseqif + " order by t.tm desc"
+        		+ "where t.tm between :fmdt and :todt " + sseqif + " order by t.mmgb, t.seq, t.bno, t.stand, t.loc, t.tm desc"
         		, Motehist.class);
 
         qMotes.setParameter("fmdt", fmdt);
@@ -419,8 +421,7 @@ public class RealTime  {
 
 	}
 	
-	private Date time_s = new Date();
-	private Date fmdt, todt, time_c = time_s ;
+	private Date fmdt, todt ;
 
     private MouseAdapter madpt = new MouseAdapter() {
     	@Override
@@ -479,19 +480,19 @@ public class RealTime  {
 		    case 0:
 		    	return mote.getMmgbNm()  ;
 		    case 1:
-		    	return dateFmt.format( mote.getTm() ) ;
+		    	return mote.getSeq()+"";
 		    case 2:
 		    	return mote.getChocknm();
 		    case 3:
-		    	return mote.getSeq()+"";
-		    case 4:
 		    	return mote.getLocNmlong();
+		    case 4:
+		    	return dateFmt.format( mote.getTm() ) ;
 		    case 5:
 		    	return act[mote.getAct()] ;
 		    case 6:
 		    	return String.format("%.2f", mote.getRtd()) ;
 		    case 7:
-		    	return mote.getBatt() +"";
+		    	return String.format( "%.3f", mote.getBatt()/1000.0 );
 		    case 8:
 		    	return mote.getRtd() > mote.getTempD() ? "위험" : mote.getRtd() > mote.getTempW() ? "경고":"" ;
 		    }

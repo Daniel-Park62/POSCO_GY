@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
@@ -65,7 +66,7 @@ public class ViewChart {
 	final Color GREEN = Display.getDefault().getSystemColor(SWT.COLOR_GREEN);
 	final Color CYAN = Display.getDefault().getSystemColor(SWT.COLOR_DARK_CYAN);
     private DateFormat dateFmt1 = new SimpleDateFormat("yyyy-MM-dd");
-    private DateFormat dateFmt2 = new SimpleDateFormat("HH:mm:ss");
+    private DateFormat dateFmt2 = new SimpleDateFormat("HH:mm");
     final private DateFormat ymd = new SimpleDateFormat("yyyyMMddHHmmss");
     private SimpleDateFormat dtFmt =  new SimpleDateFormat("MM/dd HH:mm.ss") ;
 	Timestamp time_c = Timestamp.valueOf("1900-01-01 00:00:00") ;
@@ -87,9 +88,10 @@ public class ViewChart {
 	private Combo cbddown ;
 	private TableViewer tv; 
 	private DateText  fromDate, toDate ;
-	private TimeText fromTm,  toTm ;
+	private TimeText2 fromTm,  toTm ;
 	private Text ftemp, ttemp ; 
-	private Button  btnWS, btnDS;
+	private Button  btnWS, btnDS, btnT, btnB , btnlocB , btnlocI, btnlocW;
+	private Spinner sstd ;
 	
 	public ViewChart(Composite parent, int style, String[] bnos, String fdt ) throws InterruptedException {
 		this(parent, style);
@@ -128,102 +130,107 @@ public class ViewChart {
 		lticon.setFont( SWTResourceManager.getFont("Tahoma", 22, SWT.BOLD ) );
     	
 		Composite composite_2 = new Composite(parent, SWT.NONE);
-		GridLayout gl_in = new GridLayout(16,false);
-		gl_in.marginRight = 50;
-		gl_in.marginLeft = 65;
-		
-		composite_2.setLayout(gl_in);
-		GridData gd_in = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd_in.heightHint = 50;
+		GridLayoutFactory.fillDefaults().margins(50, -1).numColumns(6).equalWidth(false).spacing(20, -1).applyTo(composite_2);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(composite_2);
 
+		Composite composite_22 = new Composite(parent, SWT.NONE);
+		GridLayoutFactory.fillDefaults().margins(50, -1).numColumns(12).equalWidth(false).applyTo(composite_22);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(composite_22);
+
+		Label lbl = new Label(composite_2, SWT.NONE) ;
+		lbl.setText("*조회대상선택");
+		lbl.setFont(font2);
+		lbl.pack();
+//		lbl.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         Group  rGroup0 = new Group (composite_2, SWT.NONE);
         rGroup0.setLayout(new RowLayout(SWT.HORIZONTAL));
         rGroup0.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
-    	btnWS = new Button(rGroup0, SWT.RADIO);
+
+        btnWS = new Button(rGroup0, SWT.CHECK);
     	btnWS.setText("W/S ");
     	btnWS.setFont(font21);
     	btnWS.setSelection(true);
-    	btnDS = new Button(rGroup0, SWT.RADIO);
+    	btnDS = new Button(rGroup0, SWT.CHECK);
     	btnDS.setText("D/S");
     	btnDS.setFont(font21);
-    	btnDS.setSelection(false);
+    	btnDS.setSelection(true);
 
-
-		composite_2.setLayoutData(gd_in);
-		{
-			Label lbl = new Label(composite_2, SWT.NONE) ;
-			lbl.setText("*조회구분");
-			lbl.setFont(font2);
-			lbl.pack();
-			lbl.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-		}
+		lbl = new Label(composite_2, SWT.NONE) ;
+		lbl.setText("*Stand");
+		lbl.setFont(font2);
+		lbl.pack();
+		lbl.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+	
+		sstd = new Spinner(composite_2, SWT.BORDER | SWT.CENTER);
+		sstd.setMinimum(1);
+		sstd.setMaximum(5);
+		sstd.setIncrement(1);
+		sstd.setFont(font21);
+		GridDataFactory.fillDefaults().hint(60, -1).align(SWT.CENTER, SWT.CENTER).applyTo(sstd) ;
 		
-		cbddown = new Combo(composite_2, SWT.DROP_DOWN | SWT.BORDER);
-		cbddown.setFont(font21);
-		cbddown.setItems(new String[] {"Chock","센서#"});
-		cbddown.select(1);
-		cbddown.pack();
-		cbddown.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        Group  rGroup1 = new Group (composite_2, SWT.NONE);
+        rGroup1.setLayout(new RowLayout(SWT.HORIZONTAL));
+        rGroup1.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
+    	btnT = new Button(rGroup1, SWT.CHECK);
+    	btnT.setText("Top ");
+    	btnT.setFont(font21);
+    	btnT.setSelection(true);
+    	btnB = new Button(rGroup1, SWT.CHECK);
+    	btnB.setText("Bottom");
+    	btnB.setFont(font21);
+    	btnB.setSelection(true);
+    	
+        Group  rGroup2 = new Group (composite_2, SWT.NONE);
+        rGroup2.setLayout(new RowLayout(SWT.HORIZONTAL));
+        rGroup2.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
+    	btnlocB = new Button(rGroup2, SWT.CHECK);
+    	btnlocB.setText("BUR");
+    	btnlocB.setFont(font21);
+    	btnlocB.setSelection(true);
+    	btnlocI = new Button(rGroup2, SWT.CHECK);
+    	btnlocI.setText("IMR");
+    	btnlocI.setFont(font21);
+    	btnlocI.setSelection(true);
+    	btnlocW = new Button(rGroup2, SWT.CHECK);
+    	btnlocW.setText("WR");
+    	btnlocW.setFont(font21);
+    	btnlocW.setSelection(true);
 
-		cbddown.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				// TODO Auto-generated method stub
-				
-				if ( cbddown.getSelectionIndex() == 0 )  {
-					id_list.setItems(AppMain.appmain.bno); 
-				} else {
-					id_list.setItems(AppMain.appmain.sno);
-				}
-				id_list.select(0);				
-				slbl.setText(cbddown.getText());
-				slbl.requestLayout();
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-		
 		{
-			Label lbl = new Label(composite_2, SWT.NONE) ;
-			lbl.setText("  * 조회 Date/Time ");
+			lbl = new Label(composite_22, SWT.NONE) ;
+			lbl.setText("*조회기간 ");
 			lbl.setFont(font2);
 			lbl.pack();
 			lbl.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 
 		}
 		
-		GridData gdinput = new GridData(100,20);
-		fromDate = new DateText (composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER  );
-		fromDate.setLayoutData(gdinput);
+		fromDate = new DateText (composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER  );
+		GridDataFactory.fillDefaults().hint(100, -1).align(SWT.FILL, SWT.CENTER).applyTo(fromDate) ;
 		fromDate.setFont(font21);
 		fromDate.addMouseListener(madpt);
-		Calsel calsel = new Calsel(composite_2, SWT.NONE,fromDate) ;
-		fromTm = new TimeText(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
-		fromTm.setLayoutData(gdinput);
+		Calsel calsel = new Calsel(composite_22, SWT.NONE,fromDate) ;
+		fromTm = new TimeText2(composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		GridDataFactory.fillDefaults().hint(60, -1).align(SWT.FILL, SWT.CENTER).applyTo(fromTm) ;
 		fromTm.setFont(font21);
 		
 		{
-			Label lbl = new Label(composite_2, SWT.NONE) ;
+			lbl = new Label(composite_22, SWT.NONE) ;
 			lbl.setText(" ~ ");
 			lbl.setFont(font2);
 			lbl.pack();
 			lbl.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		}
-		toDate = new DateText(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
-		toDate.setLayoutData(gdinput);
+		toDate = new DateText(composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		GridDataFactory.fillDefaults().hint(100, -1).align(SWT.FILL, SWT.CENTER).applyTo(toDate) ;
 		toDate.setFont(font21);
 		toDate.addMouseListener(madpt);
-		calsel = new Calsel(composite_2, SWT.NONE,toDate) ;
-		toTm = new TimeText(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
-		toTm.setLayoutData(gdinput);
+		calsel = new Calsel(composite_22, SWT.NONE,toDate) ;
+		toTm = new TimeText2(composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		GridDataFactory.fillDefaults().hint(60, -1).align(SWT.FILL, SWT.CENTER).applyTo(toTm) ;
 		toTm.setFont(font21);
 		{
-			Label lbl = new Label(composite_2, SWT.NONE) ;
+			lbl = new Label(composite_22, SWT.NONE) ;
 			lbl.setText("  *온도 ");
 			lbl.setFont(font2);
 			lbl.pack();
@@ -247,26 +254,26 @@ public class ViewChart {
 	        }
 	    };
 
-		ftemp = new Text(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+		ftemp = new Text(composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
 		ftemp.setText("0");
 		ftemp.setFont(font21);
 		ftemp.addVerifyListener(vl);
 		GridDataFactory.fillDefaults().hint(50, 20).align(SWT.CENTER, SWT.CENTER).applyTo(ftemp);
-		ttemp = new Text(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+		ttemp = new Text(composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
 		ttemp.setText("80");
 		ttemp.addVerifyListener(vl);
 		ttemp.setFont(font21);
 		GridDataFactory.fillDefaults().hint(50, 20).align(SWT.CENTER, SWT.CENTER).applyTo(ttemp);
 		
-		Button searchb = new Button(composite_2, SWT.PUSH);
+		Button searchb = new Button(composite_22, SWT.PUSH);
 		searchb.setFont(font2);
 		searchb.setText(" Search ");
 		searchb.pack();
 		searchb.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String sfrom = fromDate.getText() + " " + fromTm.getText() ;
-				String sto = toDate.getText() + " " + toTm.getText() ;
+				String sfrom = fromDate.getText() + " " + fromTm.getText() + ":00" ;
+				String sto = toDate.getText() + " " + toTm.getText() + ":59" ;
 				
 				try {
 					Timestamp ts_dt = Timestamp.valueOf(sfrom) ;
@@ -293,39 +300,13 @@ public class ViewChart {
 		toDate.setText(dateFmt1.format(todt ) );
 		toTm.setText(dateFmt2.format(todt ) );
 		
-		Composite comp_b = new Composite(parent,  SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL,  SWT.FILL).grab(true, true).applyTo(comp_b);
-		GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(false).margins(10, 20).spacing(5, 10) .applyTo(comp_b);
-		comp_b.setBackground(SWTResourceManager.getColor(250, 250, 252));
+//		Composite comp_b = new Composite(parent,  SWT.NONE);
+//		GridDataFactory.fillDefaults().align(SWT.FILL,  SWT.FILL).grab(true, true).applyTo(comp_b);
+//		GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(false).margins(10, 20).spacing(5, 10) .applyTo(comp_b);
+//		comp_b.setBackground(SWTResourceManager.getColor(250, 250, 252));
 		
-		Composite cm_list = new Composite(comp_b, SWT.NONE) ;
-		GridLayoutFactory.fillDefaults().margins(20, 20).spacing(-1, 20).applyTo(cm_list);
-		GridDataFactory.fillDefaults().align(SWT.CENTER,  SWT.TOP).grab(false, true).applyTo(cm_list);
-		slbl = new Label(cm_list, SWT.NONE);
-		slbl.setText("센서#");
-		slbl.setFont(font3);
-//		slbl.setBackground(CIB);
-		GridDataFactory.fillDefaults().align(SWT.CENTER,  SWT.TOP).grab(true, true).applyTo(slbl);
-		
-//		CheckboxTableViewer tvl = CheckboxTableViewer.newCheckList(cm_list, SWT.BORDER );
-//		tvl.setContentProvider(new ArrayContentProvider());
-//		tvl.setLabelProvider(new MeasuresProvider());
-//		
-//		Table tbl = tvl.getTable();
-//		tbl.setLinesVisible(true);
-		
-		
-		id_list 
-		 = new org.eclipse.swt.widgets.List(cm_list,SWT.V_SCROLL | SWT.MULTI  );
-		
-		id_list.setItems(AppMain.appmain.sno);
-		id_list.setFont(fontL);
-		id_list.select(0);
-		
-		GridDataFactory.fillDefaults().align(SWT.RIGHT,  SWT.TOP).hint(-1, 400).grab(true, true).applyTo(id_list);
-
-		browser = new Browser(comp_b, SWT.BORDER | SWT.EMBEDDED);
-    	GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).hint(-1, 400).applyTo(browser);
+		browser = new Browser(parent, SWT.BORDER | SWT.EMBEDDED);
+    	GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(browser);
     	final BrowserFunction function = new CustomFunction (browser, "javaFunction", this);
 //		browser.setBackground(SWTResourceManager.getColor(250, 250, 252));
 
@@ -341,6 +322,7 @@ public class ViewChart {
 //			  }
 //		});
 
+		/*
 		tv = new TableViewer(parent, SWT.FULL_SELECTION |SWT.VIRTUAL );
 		tv.setUseHashlookup(true);
 		Table table = tv.getTable();
@@ -379,6 +361,7 @@ public class ViewChart {
 			}
 
 		});
+		*/
 		
     }
     private class MeasuresProvider extends LabelProvider implements ITableLabelProvider {
@@ -421,7 +404,7 @@ public class ViewChart {
 		em.clear();
 		em.getEntityManagerFactory().getCache().evictAll();
         String qstr = String.format("WITH vt AS " + 
-        		"(SELECT x.seq , x.rtd1 y2temp FROM vmotehist X join " + 
+        		"(SELECT x.loc_name , x.rtd1 y2temp FROM vmotehist X join " + 
         		"(SELECT seq, MAX(tm) as max_tm FROM vmotehist WHERE %s IN (%s) " +
         		"and tm BETWEEN '%s' AND '%s' GROUP BY seq ) Y " + 
         		"ON x.seq = y.seq AND x.tm = y.max_tm) " 
@@ -456,10 +439,9 @@ public class ViewChart {
     }
     
 	private void refreshChart() {
-		int gb = cbddown.getSelectionIndex() ;
-		if (id_list.getSelectionCount() < 1) return ;
-		String sfrom = fromDate.getText() + " " + fromTm.getText() ;
-		String sto = toDate.getText() + " " + toTm.getText() ;
+
+		String sfrom = fromDate.getText() + " " + fromTm.getText() + ":00";
+		String sto = toDate.getText() + " " + toTm.getText() + ":59";
 //		System.out.println(sfrom + " - " + sto);
 		try {
 			Timestamp ts_dt = Timestamp.valueOf(sfrom) ;
@@ -468,19 +450,27 @@ public class ViewChart {
 			MessageDialog.openError( null, "날짜확인", "날짜입력을 바르게 하세요.") ;
 			return ;
 		}
-		
-		refreshData(sfrom, sto) ;
-		String smmgb = " and mmgb = '" + ( btnWS.getSelection() ? "1" : "2") + "'" ;
+		StringBuilder sbr = new StringBuilder() ;
+		sbr.append("stand = " + sstd.getSelection()) ;
+//		refreshData(sfrom, sto) ;
+		if ( !btnWS.getSelection() || !btnDS.getSelection())
+			sbr.append(" and mmgb = " + ( btnWS.getSelection() ? "'1'" : "'2'"));
+		if ( !btnT.getSelection() || !btnB.getSelection())
+			sbr.append(" and tb = " + ( btnT.getSelection() ? "'T'" : "'B'"));
+		if ( !btnlocB.getSelection() || !btnlocI.getSelection() || !btnlocW.getSelection()) {
+			sbr.append(" and '") ;
+			sbr.append( btnlocB.getSelection() ? "B" : "") ;
+			sbr.append( btnlocI.getSelection() ? "I" : "") ;
+			sbr.append( btnlocW.getSelection() ? "W" : "") ;
+			sbr.append("' RLIKE loc") ;
+		}
 
     	String sdt = ymd.format( Timestamp.valueOf(sfrom) ) ;
 		String tdt = ymd.format( Timestamp.valueOf(sto) ) ;
 
-		String ids = String.join(",",  id_list.getSelection() );
-//		JSONArray jlist = new JSONArray() ;
-//		jlist.addAll( Arrays.asList( id_list.getSelection()) ) ;
+
 		JSONObject jo = new JSONObject() ;
-		jo.put("gb", gb == 0 ? "bno":"seq") ;
-		jo.put("cond", "seq in (" + ids + ")" + smmgb ) ;
+		jo.put("cond", sbr.toString() ) ;
 		jo.put("ftemp", ftemp.getText()) ;
 		jo.put("ttemp", ttemp.getText());
 		jo.put("ftm", sdt) ;
@@ -497,8 +487,7 @@ public class ViewChart {
 		String val = jo.toJSONString() ;
 //		System.out.println(val);
 		browser.execute("updChart(" + val + ");");
-		
-
+		browser.requestLayout() ;
 //		browser.refresh();
     }
 

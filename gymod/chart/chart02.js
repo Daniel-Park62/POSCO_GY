@@ -181,7 +181,7 @@ function changesize(h) {
 
 function updChart(qdata) {
 
-  $.post( "http://"+ location.hostname + ":9977/Chart/sq", qdata )
+  $.post( "http://"+ location.hostname + ":9977/Chart/stand", qdata )
   .done(function( data ) {
     let obj = JSON.parse(data);
     console.log( obj );
@@ -191,8 +191,10 @@ function updChart(qdata) {
     categories = obj.categorie ;
     chartx.xAxis.categories = obj.categorie ;
     chartx.xAxis.tickInterval = obj.categorie.length / 10 ;
+    changesize(700) ;
     chart = Highcharts.chart('container',chartx );
 
+    // chart.reflow();
   }).fail(function() {
     alert( "error" + qdata );
   });

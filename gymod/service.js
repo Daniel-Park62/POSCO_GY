@@ -13,6 +13,49 @@ router.all('/*', function(req, res, next) {
   next();
 });
 
+router.post('/stand', (req, res) => {
+  let fdt = moment(req.body.ftm,["YYYYMMDDHHmmss","YYYYMMDD"]).format('YYYY-MM-DD HH:mm:ss') ;
+  let tdt = moment(req.body.ttm,["YYYYMMDDHHmmss","YYYYMMDD"]).format('YYYY-MM-DD HH:mm:ss') ;
+
+  // console.log(req.body) ;
+  // bodym = JSON.parse(JSON.stringify(req.body));
+  // console.log(bodym) ;
+  con.query(
+      "SELECT loc_name as seq, temp,  date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
+      where "+ req.body.cond + " and tm between ? and ?  and temp between ? and ? order by loc_name, tm " ,
+       [ fdt, tdt, req.body.ftemp, req.body.ttemp] )
+    .then( dt => {
+        // motesmac = JSON.parse(JSON.stringify(dt)) ;
+
+        let rdata = [];
+        let tdata = [];
+        let cat = [];
+        let sv_seq = dt.length > 0 ? dt[0].seq : '1';
+        let sw=0 ;
+        dt.forEach((e,i) => {
+          if  (sv_seq != e.seq  ) {
+            rdata.push( {name : sv_seq, lineWidth: 2, data: tdata} ) ;
+            sv_seq = e.seq ;
+            tdata = [] ;
+            sw = 1;
+          }
+          tdata.push(e.temp);
+          if (sw == 0) cat.push(e.tm);
+        }) ;
+        if (dt.length > 0 )
+          rdata.push( {name : sv_seq, lineWidth: 2, data: tdata} ) ;
+
+        let sdata =  JSON.stringify( {
+          series : rdata,
+          categorie: cat} );
+          // console.log(sdata) ;
+        res.json(sdata);
+      })
+      .catch( err => {
+        console.error(err) ;
+        res.send(err);
+      }) ;
+});
 
 router.post('/sq', (req, res) => {
   let fdt = moment(req.body.ftm,["YYYYMMDDHHmmss","YYYYMMDD"]).format('YYYY-MM-DD HH:mm:ss') ;

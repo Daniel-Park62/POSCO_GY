@@ -1,0 +1,3 @@
+USE GYDB;
+ALTER TABLE `moteconfig`
+	ADD COLUMN `updAuto` CHAR(1) NULL DEFAULT 'Y' AFTER `batt`;

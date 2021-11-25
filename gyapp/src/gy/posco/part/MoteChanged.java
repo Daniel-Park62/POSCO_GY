@@ -79,12 +79,12 @@ public class MoteChanged  {
     private TableViewer tv;
     private DateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private DateFormat dateFmt1 = new SimpleDateFormat("yyyy-MM-dd");
-    private DateFormat timeFmt = new SimpleDateFormat("HH:mm:ss");
+    private DateFormat timeFmt = new SimpleDateFormat("HH:mm");
     private Combo cbddown ;
     private Cursor busyc = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
     private Cursor curc ;
     private String[] slist, slistA ;
-    private Button  btnm ,btnb ,btnS, btnWS, btnDS;
+    private Button  btnm ,btnS;
     
 	@PostConstruct
 	public void postConstruct(Composite parent) {
@@ -131,19 +131,7 @@ public class MoteChanged  {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
 			.grab(true, false).hint(SWT.DEFAULT, 60).applyTo(composite_2);
 
-        Group  rGroup0 = new Group (composite_2, SWT.NONE);
-        rGroup0.setLayout(new RowLayout(SWT.VERTICAL));
-        rGroup0.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
-    	btnWS = new Button(rGroup0, SWT.CHECK);
-    	btnWS.setText("W/S");
-    	btnWS.setFont(font3);
-    	btnWS.setSelection(true);
-    	btnDS = new Button(rGroup0, SWT.CHECK);
-    	btnDS.setText("D/S");
-    	btnDS.setFont(font3);
-    	btnDS.setSelection(true);
-		
-        Group  rGroup1 = new Group (composite_2, SWT.NONE);
+	    Group  rGroup1 = new Group (composite_2, SWT.NONE);
         rGroup1.setLayout(new RowLayout(SWT.HORIZONTAL));
         rGroup1.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
         
@@ -166,18 +154,18 @@ public class MoteChanged  {
 			}
 		});
 
-    	btnb = new Button(rGroup1, SWT.RADIO);
-    	btnb.setText("설치위치 ");
-    	btnb.setFont(font2);
-
-    	btnb.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				cbddown.setItems(new String[] {"ALL","BUR","IMR","WR"});
-				cbddown.select(0);
-				cbddown.pack();
-			}
-		});
+//    	btnb = new Button(rGroup1, SWT.RADIO);
+//    	btnb.setText("설치위치 ");
+//    	btnb.setFont(font2);
+//
+//    	btnb.addSelectionListener(new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				cbddown.setItems(new String[] {"ALL","BUR","IMR","WR"});
+//				cbddown.select(0);
+//				cbddown.pack();
+//			}
+//		});
 
     	btnS = new Button(rGroup1, SWT.RADIO);
     	btnS.setText("Stand#");
@@ -225,7 +213,7 @@ public class MoteChanged  {
 		fromDate.setFont(font21);
 		fromDate.addMouseListener(madpt);
 		Calsel calsel = new Calsel(composite_2, SWT.NONE,fromDate) ;
-		TimeText fromTm = new TimeText(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		TimeText2 fromTm = new TimeText2(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
 		fromTm.setLayoutData(gdinput);
 		fromTm.setFont(font21);
 		{
@@ -240,7 +228,7 @@ public class MoteChanged  {
 		toDate.setFont(font21);
 		toDate.addMouseListener(madpt);
 		calsel = new Calsel(composite_2, SWT.NONE,toDate) ;
-		TimeText toTm = new TimeText(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		TimeText2 toTm = new TimeText2(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
 		toTm.setLayoutData(gdinput);
 		toTm.setFont(font21);
 
@@ -252,8 +240,8 @@ public class MoteChanged  {
 		bq.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String sfrom = fromDate.getText() + " " + fromTm.getText() ;
-				String sto = toDate.getText() + " " + toTm.getText() ;
+				String sfrom = fromDate.getText() + " " + fromTm.getText() + ":00" ;
+				String sto = toDate.getText() + " " + toTm.getText() + ":59";
 				try {
 					Timestamp.valueOf(sfrom) ;
 					Timestamp.valueOf(sto) ;
@@ -311,12 +299,12 @@ public class MoteChanged  {
 	    table.addListener(SWT.MeasureItem,  new Listener() {
 	    	@Override
 	    	public void handleEvent(Event event) {
-	    	event.height = (int)(event.gc.getFontMetrics().getHeight() * 1.8) ;
+	    	event.height = (int)(event.gc.getFontMetrics().getHeight() * 1.5) ;
 	    	}
 	    });		
 		
-		String[] cols = { "WD구분", "날짜/시간", "장치위치", "센서번호"}; 
-		int[]    iw   = { 100, 200, 250, 200 };
+		String[] cols = { "장치위치","WD구분", "센서번호", "날짜/시간", "Chock"}; 
+		int[]    iw   = { 200,100, 150, 250, 150 };
 
 //		TableViewerColumn tvcol = new TableViewerColumn(tv, SWT.NONE | SWT.CENTER);
 		for (int i=0; i<cols.length; i++) {
@@ -357,18 +345,18 @@ public class MoteChanged  {
 		
 		String qval = "";
 		String qcol = cbddown.getText()  ;
-		if (btnb.getSelection()) qcol = "'" + qcol.substring(0, 1) + "'"; 
+ 
 		if  (cbddown.getSelectionIndex() > 0) {
-			qval = "where " +  (btnm.getSelection() ? "seq " : btnb.getSelection() ? "loc " : "stand " ) + "= " + qcol;
+			qval = "and " +  (btnm.getSelection() ? "seq " : "stand " ) + "= " + qcol;
 		}
 
 		parent.getShell().setCursor( busyc);
 		
 		String qstr = String.format( "WITH VT AS " + 
-				"(SELECT pkey,mmgb, seq, loc, stand ,tb,  tm,  " + 
+				"(SELECT pkey,mmgb, seq, bno, loc, stand ,tb,  tm,  " + 
 				"        lag(stand,1) OVER (PARTITION BY SEQ ORDER BY TM) LSTAND " + 
-				"FROM vmotehist  %s  ) " + 
-				"SELECT * FROM VT WHERE STAND <> IFNULL(LSTAND,'') and tm between '%s' and '%s' " , qval , sfrom , sto );
+				"FROM vmotehist where loc = 'B' %s  ) " + 
+				"SELECT * FROM VT WHERE stand > 0 and STAND <> IFNULL(LSTAND,'') and tm between '%s' and '%s' order by stand, tb desc, tm, mmgb" , qval , sfrom , sto );
 
 		List<Motehist> motelist = em.createNativeQuery(qstr, Motehist.class)
 				.getResultList();
@@ -435,13 +423,15 @@ public class MoteChanged  {
 			  Motehist mote = (Motehist) element;
 		    switch (columnIndex) {
 		    case 0:
-		    	return mote.getMmgbNm() ;
-		    case 1:
-		    	return dateFmt.format( mote.getTm() ) ;
-		    case 2:
 		    	return mote.getLocNmlong();
-		    case 3:
+		    case 1:
+		    	return mote.getMmgbNm() ;
+		    case 2:
 		    	return mote.getSeq()+"";
+		    case 3:
+		    	return dateFmt.format( mote.getTm() ) ;
+		    case 4:
+		    	return mote.getChocknm();
 
 		    }
 			return null;

@@ -43,6 +43,8 @@ process.on('uncaughtException', function (err) {
 
 });
 
+console.log("** 4PCM RM Roll 데이터수집 start **") ;
+
 const child = fork(path.join(__dirname, "datins.js"));
 
 child.on("close", function (code) {

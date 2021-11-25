@@ -35,7 +35,7 @@ public class DashBoard2 {
 
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     Font font1 = SWTResourceManager.getFont("Tahoma", 22, SWT.BOLD  ) ;
-    Font font2 = SWTResourceManager.getFont("맑은 고딕", 14, SWT.NORMAL);
+    Font font2 = SWTResourceManager.getFont("맑은 고딕", 13, SWT.NORMAL);
     Font font13 = SWTResourceManager.getFont("Calibri", 13, SWT.NORMAL ) ;
     Font font12 = SWTResourceManager.getFont("맑은 고딕", 12, SWT.NORMAL ) ;
     
@@ -62,7 +62,7 @@ public class DashBoard2 {
 		lbl.setFont(font1);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.TOP).applyTo(lbl);
 		lbl = new CLabel(composite_l, SWT.NONE);
-		lbl.setText("Work side										Drive side");
+		lbl.setText("Work side												Drive side");
 		lbl.setFont(font2);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.TOP).applyTo(lbl);
 		
@@ -99,7 +99,6 @@ public class DashBoard2 {
 		Table tbl = tvv.getTable();
 		tbl.setHeaderVisible(true);
 		tbl.setLinesVisible(true);
-		
 		tbl.setFont(font2);
 		
 		tbl.setHeaderBackground(AppMain.coltblh);
@@ -117,13 +116,24 @@ public class DashBoard2 {
 		tvc.setLabelProvider(new ColumnLabelProvider() {} );
 
 		tvc = new TableViewerColumn(tvv, SWT.NONE);
-		tvc.getColumn().setWidth(140) ;
-		tvc.getColumn().setAlignment(SWT.LEFT);
-		tvc.getColumn().setText("센서#");
+		tvc.getColumn().setWidth(60) ;
+		tvc.getColumn().setAlignment(SWT.CENTER);
+		tvc.getColumn().setText("센서");
 		tvc.setLabelProvider(new myColProvider() {
 			@Override
 			public String getText(Object element) {
-				return element == null ? "" :String.format( "%02d:%s",((Moteinfo)element).getSeq(),((Moteinfo)element).getDescript())  ;
+				return element == null ? "" :String.format( "%02d",((Moteinfo)element).getSeq() )  ;
+			}
+		});
+
+		tvc = new TableViewerColumn(tvv, SWT.NONE);
+		tvc.getColumn().setWidth(80) ;
+		tvc.getColumn().setAlignment(SWT.CENTER);
+		tvc.getColumn().setText("센서명");
+		tvc.setLabelProvider(new myColProvider() {
+			@Override
+			public String getText(Object element) {
+				return element == null ? "" :((Moteinfo)element).getDescript()   ;
 			}
 		});
 
@@ -139,7 +149,7 @@ public class DashBoard2 {
 		});
 
 		tvc = new TableViewerColumn(tvv, SWT.NONE);
-		tvc.getColumn().setWidth(160) ;
+		tvc.getColumn().setWidth(140) ;
 		tvc.getColumn().setAlignment(SWT.CENTER);
 		tvc.getColumn().setText("장치위치");
 		tvc.setLabelProvider(new myColProvider() {
@@ -152,7 +162,7 @@ public class DashBoard2 {
 		tvc = new TableViewerColumn(tvv, SWT.NONE);
 		tvc.getColumn().setWidth(80) ;
 		tvc.getColumn().setAlignment(SWT.CENTER);
-		tvc.getColumn().setText("온도");
+		tvc.getColumn().setText("온도(℃)");
 		tvc.setLabelProvider(new myColProvider() {
 			@Override
 			public String getText(Object element) {
@@ -162,13 +172,15 @@ public class DashBoard2 {
 
 
 		tvc = new TableViewerColumn(tvv, SWT.NONE);
-		tvc.getColumn().setWidth(120) ;
-		tvc.getColumn().setAlignment(SWT.CENTER);
-		tvc.getColumn().setText("배터리");
+		tvc.getColumn().setWidth(100) ;
+		tvc.getColumn().setAlignment(SWT.LEFT);
+		tvc.getColumn().setText("배터리(v)");
+
 		tvc.setLabelProvider(new myColProvider() {
 			@Override
 			public String getText(Object element) {
-				return element == null ? "" : ((Moteinfo)element).getBatt() +""  ;
+				int batt = ((Moteinfo)element).getBatt() ;
+				return element == null || batt == 0 ? "" : String.format( "%.3f", batt/1000.0 )  ;
 			}
 			@Override
 			public Image getImage(Object element) {
@@ -178,23 +190,24 @@ public class DashBoard2 {
 				if (  m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() - 1000 ) 
 					return AppMain.img_danger ;
 				else if (m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() )
-					return AppMain.img_warn ;
+					return AppMain.img_lowb ;
 				else
 					return AppMain.img_act ;
 			}
+			
 		});
 
-		tvc = new TableViewerColumn(tvv, SWT.NONE);
-		tvc.getColumn().setWidth(140) ;
-		tvc.getColumn().setAlignment(SWT.CENTER);
+		tvc = new TableViewerColumn(tvv, SWT.LEFT);
+		tvc.getColumn().setWidth(120) ;
+		tvc.getColumn().setAlignment(SWT.LEFT);
 		tvc.getColumn().setText("상태정보");
 		tvc.setLabelProvider(new myColProvider() {
 			@Override
 			public Color getForeground(Object e) {
-				Color col = AppMain.colact ;
+				Color col = SWTResourceManager.getColor(49, 134, 255) ;
 				if (e == null) return col ;
 				if (((Moteinfo)e).getAct() == 0) 
-					col = AppMain.colinact ; 
+					col = AppMain.colinact2 ; 
 
 				return col ;
 			}
@@ -269,9 +282,9 @@ public class DashBoard2 {
 
 		time_c = AppMain.appmain.getLasTime(1) ;
 
-		List<Moteinfo> moteinfo2 = em.createNativeQuery("SELECT m.pkey, m.mmgb, m.seq, m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd1, m.batt, m.act,m.temp_d,temp_w ,chocknm from vMoteinfo m, LasTime l"
+		List<Moteinfo> moteinfo2 = em.createNativeQuery("SELECT m.pkey, m.mmgb, m.seq, m.cntgb, m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd1, m.batt, m.act,m.temp_d,temp_w ,chocknm from vMoteinfo m, LasTime l"
 				+ " where m.mmgb = '2' and m.tm = l.lastm  UNION "
-				+ "SELECT m.pkey , m.mmgb, m.seq, m.bno, m.stand, m.loc,m.tb,descript, cast(0 as float), m.batt, m.act,temp_d,temp_w, '' from motestatus m WHERE mmgb = '2' and m.gubun = 'R' AND m.spare = 'N' "
+				+ "SELECT m.pkey , m.mmgb, m.seq, 0, m.bno, m.stand, m.loc,m.tb,descript, cast(0 as float), m.batt, m.act,temp_d,temp_w, '' from motestatus m WHERE mmgb = '2' and m.gubun = 'R' AND m.spare = 'N' "
 				+ " order by seq "
 				, Moteinfo.class)
 				.getResultList() ;
@@ -279,13 +292,13 @@ public class DashBoard2 {
 		tv2.setInput(moteinfo2);
 		tv2.refresh();
 
-		List<Moteinfo> moteinfo = em.createNativeQuery("SELECT m.pkey,  m.mmgb, m.seq,m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd1, m.batt, m.act,temp_d,temp_w,chocknm from vMoteinfo m, LasTime l"
+		List<Moteinfo> moteinfo = em.createNativeQuery("SELECT m.pkey,  m.mmgb, m.seq, m.cntgb, m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd1, m.batt, m.act,temp_d,temp_w,chocknm from vMoteinfo m, LasTime l"
 				+ " where m.mmgb = '1' and m.tm = l.lastm  UNION  "
-				+ "SELECT m.pkey + 888,  m.mmgb, m.seq,m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd2, m.batt, m.act,temp_d,temp_w,chocknm from vMoteinfo m, LasTime l"
+				+ "SELECT m.pkey + 888,  m.mmgb, m.seq,m.cntgb,m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd2, m.batt, m.act,temp_d,temp_w,chocknm from vMoteinfo m, LasTime l"
 				+ " where m.mmgb = '1' and m.tm = l.lastm and m.cntgb = 1 UNION  "
-				+ "SELECT m.pkey + 999,  m.mmgb, m.seq,m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd3, m.batt, m.act,temp_d,temp_w,chocknm from vMoteinfo m, LasTime l"
+				+ "SELECT m.pkey + 999,  m.mmgb, m.seq,m.cntgb,m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd3, m.batt, m.act,temp_d,temp_w,chocknm from vMoteinfo m, LasTime l"
 				+ " where m.mmgb = '1' and m.tm = l.lastm and m.cntgb = 1 and m.seq % 2 = 1 UNION "
-				+ "SELECT m.pkey , m.mmgb, m.seq, m.bno, m.stand, m.loc,m.tb,descript, cast(0 as float), m.batt, m.act,temp_d,temp_w,'' from motestatus m WHERE mmgb = '1' and m.gubun = 'R' AND m.spare = 'N' "
+				+ "SELECT m.pkey , m.mmgb, m.seq,0, m.bno, m.stand, m.loc,m.tb,descript, cast(0 as float), m.batt, m.act,temp_d,temp_w,'' from motestatus m WHERE mmgb = '1' and m.gubun = 'R' AND m.spare = 'N' "
 				+ " order by seq , pkey"
 				, Moteinfo.class)
 				.getResultList() ;

@@ -27,6 +27,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -53,7 +54,9 @@ public class ViewAlert extends Dialog {
 	List<Motehist> tempList ;
 	EntityManager em = AppMain.emf.createEntityManager();	
 	TableViewer tv ;
-	private int gb = 0; // 1.low batt  2. OB
+	private int gb = 0; // 0.low batt  1. OB   2.스위치 
+	private String[] stit = {"Low Battery 이력조회" , "온도경고 이력조회" , "스위치 이력조회", ""} ;
+	private Label lblcnt ;
 	private class ContentProvider implements IStructuredContentProvider {
 		/**
 		 * 
@@ -103,9 +106,9 @@ public class ViewAlert extends Dialog {
         GridLayoutFactory.fillDefaults().applyTo(container);
         
         Composite comp_tit = new Composite(container, 0);
-        GridLayoutFactory.fillDefaults().numColumns(7).equalWidth(false).margins(5, 5).applyTo(comp_tit);
+        GridLayoutFactory.fillDefaults().numColumns(8).equalWidth(false).margins(5, 5).applyTo(comp_tit);
         Label lblt = new Label( comp_tit,0) ;
-        lblt.setText((gb == 1 ? "Low Battery 이력조회" : "온도경고 이력조회") );
+        lblt.setText(stit[gb] );
         lblt.setFont(font);
 
 		DateText fromDate = new DateText(comp_tit, SWT.SINGLE | SWT.BORDER | SWT.CENTER  );
@@ -161,6 +164,8 @@ public class ViewAlert extends Dialog {
 
 			}
 		}); 
+		lblcnt = new Label(comp_tit, SWT.NONE | SWT.RIGHT );
+		lblcnt.setFont(font);
 		
 		tv = new TableViewer(container, SWT.BORDER | SWT.FULL_SELECTION );
 		tv.setUseHashlookup(true);
@@ -173,9 +178,9 @@ public class ViewAlert extends Dialog {
 		
 		table.setHeaderBackground(AppMain.coltblh);
 
-		String[] cols = { "날짜/시간", "Chock", "센서번호","장치위치","상태정보","온도","배터리", "상태내용"}; 
+		String[] cols = { "날짜/시간", "Chock", "센서번호","장치위치","상태정보","온도(℃)","배터리(v)", "상태내용"}; 
 		int[]    iw   = { 200, 80, 80, 180, 80, 100, 100, 100 };
-
+		if ( gb == 2 ) cols[6] = "스위치" ;
 		TableViewerColumn tvcol = new TableViewerColumn(tv, SWT.NONE | SWT.CENTER);
 		for (int i=0; i<cols.length; i++) {
 			tvcol = new TableViewerColumn(tv, SWT.NONE | SWT.CENTER);
@@ -194,7 +199,7 @@ public class ViewAlert extends Dialog {
 	    table.addListener(SWT.MeasureItem,  new Listener() {
 	    	@Override
 	    	public void handleEvent(Event event) {
-	    	event.height = (int)(event.gc.getFontMetrics().getHeight() * 1.8) ;
+	    	event.height = (int)(event.gc.getFontMetrics().getHeight() * 1.5) ;
 	    	}
 
 	    });		
@@ -224,10 +229,8 @@ public class ViewAlert extends Dialog {
     @Override
     protected void configureShell(Shell shell) {
         super.configureShell(shell);
-		if (gb == 1) 
-			shell.setText("Low Battery 이력조회");
-		else
-			shell.setText("Out Bound 이력조회");
+
+		shell.setText(stit[gb]);
     }
     
     SimpleDateFormat fmt1 = new SimpleDateFormat("yyyy-MM-dd") ;
@@ -236,16 +239,21 @@ public class ViewAlert extends Dialog {
 		
 		Date fd = fmt1.parse(fdt) ;
 		Date td = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(tdt + " 23:59:59") ;
+		Cursor curc = this.getShell().getCursor() ;
+		lblcnt.setText("");
+		this.getShell().setCursor( AppMain.busyc);
 
 		
 		tempList = new ArrayList<Motehist>();
 		em.clear();
 		em.getEntityManagerFactory().getCache().evictAll();
         String qstr ;
-        if (gb ==  1)
+        if (gb ==  0)
         	qstr = "select t from Motehist t, Moteconfig c where t.act = 2 and t.batt > 0 and t.batt < c.batt and t.tm between ?1 and ?2  order by t.tm desc" ;
-        else 
+        else if ( gb == 1 )
         	qstr = "select t from Motehist t where t.tempD < t.temp and t.tm between ?1 and ?2 order by t.tm desc" ;
+        else
+        	qstr = "select t from Motehist t where t.swseq > 0 and t.seq != t.swseq and t.tm between ?1 and ?2 order by t.tm desc" ;
 		tempList = em.createQuery(qstr ,Motehist.class)
 				.setParameter(1,  fd)
 				.setParameter(2,  td )
@@ -253,6 +261,10 @@ public class ViewAlert extends Dialog {
 
 		tv.setInput(tempList);
 		tv.refresh();
+		tv.getTable().requestLayout();
+		lblcnt.setText(String.format("%,7d 건", tempList.size()) );
+		lblcnt.requestLayout();
+		this.getShell().setCursor( curc);
 
 //		}
 
@@ -302,7 +314,7 @@ public class ViewAlert extends Dialog {
 	    case 6:
 	    	return String.format("%.2f", mote.getRtd()) ;
 	    case 7:
-	    	return mote.getBatt() +"";
+	    	return (gb == 2 ? mote.getSwseq()+"" : String.format( "%.3f", mote.getBatt()/1000.0 ));
 	    case 8:
 	    	return mote.getRtd() > mote.getTempD() ? "위험" : mote.getRtd() > mote.getTempW() ? "경고":"" ;
 	    }

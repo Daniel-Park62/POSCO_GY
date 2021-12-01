@@ -50,7 +50,8 @@ public class DashBoard {
     Font font1 = SWTResourceManager.getFont("HY견고딕", 24 , SWT.BOLD ) ;
     Font font2 = SWTResourceManager.getFont("HY견고딕", 14, SWT.NORMAL);
     Font font12 = SWTResourceManager.getFont("맑은 고딕", 11, SWT.NORMAL ) ;
-    Font fontT = SWTResourceManager.getFont("Tahoma", 20, SWT.NORMAL  ) ;
+    Font font12B = SWTResourceManager.getFont("맑은 고딕", 12, SWT.BOLD ) ;
+    Font fontT = SWTResourceManager.getFont("맑은 고딕", 18, SWT.BOLD  ) ;
     Thread dsThread ;
 
     Standcl[] standcl = new Standcl[5];
@@ -89,7 +90,7 @@ public class DashBoard {
 		composite_l1.setBackgroundImage(img_1);
 		Label lblT = new Label(composite_l1,SWT.NONE) ;
 		lblT.setText("스탠드별 상태");
-		lblT.setFont(fontT);
+		lblT.setFont(SWTResourceManager.getFont("Tahoma", 22, SWT.BOLD ));
 		lblT.setBounds(80, 5, 200, 40);
 
 		int iy = 25 ;
@@ -119,8 +120,8 @@ public class DashBoard {
 		
 		lblAlertActive = new Label(composite_l1, SWT.NONE);
 		lblAlertActive.setAlignment(SWT.LEFT);
-		lblAlertActive.setFont(font2);
-		lblAlertActive.setBounds(750, iy, 100, 20);
+		lblAlertActive.setFont(font12B);
+		lblAlertActive.setBounds(740, iy, 150, 20);
 		lblAlertActive.setText(" 0      ");
 		lblAlertActive.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 		lblAlertActive.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
@@ -128,8 +129,8 @@ public class DashBoard {
 
 		lblAlertInactive = new Label(composite_l1, SWT.NONE);
 		lblAlertInactive.setAlignment(SWT.LEFT);
-		lblAlertInactive.setFont(font2);
-		lblAlertInactive.setBounds(750, iy+25, 100, 20);
+		lblAlertInactive.setFont(font12B);
+		lblAlertInactive.setBounds(740, iy+25, 150, 20);
 		lblAlertInactive.setText(" 0      ");
 		lblAlertInactive.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
 		lblAlertInactive.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
@@ -137,22 +138,22 @@ public class DashBoard {
 		
 		Label btnlow = new Label(composite_l1, 0) ;
 		
-		btnlow.setBounds(1150, iy+20, 50,60);
+		btnlow.setBounds(1256, iy, 50,60);
 		btnlow.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 //		btnlow.setFont( SWTResourceManager.getFont("Tahoma", 8, SWT.NORMAL ));
 
 		Label btnob = new Label(composite_l1, 0) ;
-		btnob.setBounds(1250, iy+20, 50,60);
+		btnob.setBounds(1350, iy, 50,60);
 //		btnob.setFont( SWTResourceManager.getFont("Tahoma", 8, SWT.NORMAL ));
 		Label bsetup = new Label(composite_l1, 0) ;
-		bsetup.setBounds(1340, iy+20, 50,60);
-		Label bswitch = new Label(composite_l1, 0) ;
-		bswitch.setBounds(1430, iy+20, 50,60);
+		bsetup.setBounds(1430, iy, 50,60);
+//		Label bswitch = new Label(composite_l1, 0) ;
+//		bswitch.setBounds(1430, iy+20, 50,60);
 		
 		btnlow.setCursor(AppMain.handc);
 		btnob.setCursor(AppMain.handc);
 		bsetup.setCursor(AppMain.handc);
-		bswitch.setCursor(AppMain.handc);
+//		bswitch.setCursor(AppMain.handc);
 
 		btnlow.addMouseListener(new MouseAdapter() {
 			@Override
@@ -171,15 +172,15 @@ public class DashBoard {
 			}
 			
 		});
-		bswitch.addMouseListener(new MouseAdapter() {
-			
-			@Override
-			public void mouseUp(org.eclipse.swt.events.MouseEvent arg0) {
-				ViewAlert valert = new ViewAlert(parent.getShell(), 2 ) ;
-				valert.open() ;
-			}
-			
-		});
+//		bswitch.addMouseListener(new MouseAdapter() {
+//			
+//			@Override
+//			public void mouseUp(org.eclipse.swt.events.MouseEvent arg0) {
+//				ViewAlert valert = new ViewAlert(parent.getShell(), 2 ) ;
+//				valert.open() ;
+//			}
+//			
+//		});
 
 		bsetup.addMouseListener(new MouseAdapter() {
 			
@@ -207,7 +208,7 @@ public class DashBoard {
 		lnm.pack();
 		
 		Composite composite_2 = new Composite(composite2, SWT.NONE);
-		GridLayoutFactory.fillDefaults().margins(0, 5).equalWidth(true).spacing(20, 20).numColumns(5).applyTo(composite_2);
+		GridLayoutFactory.fillDefaults().margins(0, 5).equalWidth(true).spacing(40, 20).numColumns(5).applyTo(composite_2);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(composite_2) ;
 //		composite_2.setBackground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
 		
@@ -262,26 +263,26 @@ public class DashBoard {
 		public Standcl(Composite comp, int stand) {
 			this.stand = stand ;
 			CLabel clbl = new CLabel(comp, SWT.CENTER) ;
-			clbl.setText("STAND " + stand);
+			clbl.setText("        STAND  " + stand);
 			clbl.setFont(fontT);
-			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(clbl);
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(clbl);
 			clbl = new CLabel(comp, SWT.CENTER) ;
-			clbl.setText("W/S ℃            D/S ℃    ");
+			clbl.setText("     W/S(℃)                  D/S(℃)");
 			clbl.setFont(font12);
-			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(clbl);
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(clbl);
 			Composite comp_s = new Composite(comp, SWT.NONE) ;
-			GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).spacing(90, 25).margins(30, 35).applyTo(comp_s);
+			GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).spacing(85, 25).margins(18, 35).applyTo(comp_s);
 			GridDataFactory.fillDefaults().hint(250, 500).align(SWT.FILL, SWT.FILL).applyTo(comp_s);
 			comp_s.setBackgroundImage(img_r);
 			clt[0] = new CLabel(comp_s, SWT.CENTER );
 			clt[1] = new CLabel(comp_s, SWT.CENTER );
-			clt[0].setFont(font12);
-			clt[1].setFont(font12);
-			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(clt[0]);
-			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(clt[1]);
+			clt[0].setFont(font12B);
+			clt[1].setFont(font12B);
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(65, 30).applyTo(clt[0]);
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(65, 30).applyTo(clt[1]);
 			clt[0].setBackground(SWTResourceManager.getColor( 255,248,206 )) ;
-			clt[0].setText("CBTW1");
-			clt[1].setText("CBTD1");
+			clt[0].setText("CBTW01");
+			clt[1].setText("CBTD01");
 			clt[1].setBackground(clt[0].getBackground()) ;
 			for(int i=0 ; i<6; i++)
 				for (int j=0;j<2; j++) {
@@ -289,18 +290,18 @@ public class DashBoard {
 					cltemp[j][i].setText(" 0.0");
 					cltemp[j][i].setFont(font2);
 					cltemp[j][i].setBackground(AppMain.colstr) ;
-					GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(cltemp[j][i]);
+					GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(55, 30).applyTo(cltemp[j][i]);
 				}
 			clb[0] = new CLabel(comp_s, SWT.CENTER );
 			clb[1] = new CLabel(comp_s, SWT.CENTER );
-			clb[0].setFont(font12);
-			clb[1].setFont(font12);
+			clb[0].setFont(font12B);
+			clb[1].setFont(font12B);
 			clb[0].setBackground(clt[0].getBackground()) ;
 			clb[1].setBackground(clt[0].getBackground()) ;
-			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(clb[0]);
-			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(50, 30).applyTo(clb[1]);
-			clb[0].setText("CBBW1");
-			clb[1].setText("CBBD1");
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(65, 30).applyTo(clb[0]);
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(65, 30).applyTo(clb[1]);
+			clb[0].setText("CBBW01");
+			clb[1].setText("CBBD01");
 			Composite comp_s2 = new Composite(comp, SWT.NONE) ;
 			GridLayoutFactory.fillDefaults().numColumns(3).equalWidth(true).spacing(20, 5).margins(35, -1).applyTo(comp_s2);
 			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(comp_s2);
@@ -421,7 +422,7 @@ public class DashBoard {
 					clrw[i].setForeground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
 				} else if (ms.getStatus() == 1) {
 					clrw[i].setBackground(AppMain.img_warn);
-				} else if (ms.getBatt() < AppMain.MOTECNF.getBatt()) {
+				} else if (ms.getBatt() > 0 && ms.getBatt() < AppMain.MOTECNF.getBatt()) {
 					clrw[i].setBackground(AppMain.img_lowb);
 				} else if (ms.getAct() == 0 ) {
 					clrw[i].setBackground(AppMain.img_inact);
@@ -521,15 +522,15 @@ public class DashBoard {
 		activeSsCnt = (int) motelist.stream().filter(m -> m.getAct() == 2 && m.getGubun().equals("S") ).count() ;
 		failCnt = (int) motelist.stream().filter(m -> m.getAct() != 2 && m.getGubun().equals("S") ).count() ;
 		moteLBCnt = (int) motelist.stream().filter( m -> m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() ).count() ;
-		oBCnt = (int) motelist.stream().filter(m -> m.getStatus() > 0 ).count() ;
+		oBCnt = (int) motelist.stream().filter(m -> m.getStatus() > 1 ).count() ;
 		
 		lblApActive.setText(activeCnt+"");
 		lblApInactive.setText(inactiveCnt+"");
 
 		lblTagActive.setText(activeSsCnt+"");
 		lblTagInactive.setText(failCnt+"");
-		lblAlertActive.setText(String.format  ("%2d  배터리", moteLBCnt));
-		lblAlertInactive.setText(String.format("%2d   온도", oBCnt) );
+		lblAlertActive.setText(String.format  ("%.1fV 미만: %2d건", AppMain.MOTECNF.getBatt() /1000.0, moteLBCnt));
+		lblAlertInactive.setText(String.format("%d℃ 초과: %2d건",(int) motest.get(0).getTempD(), oBCnt) );
 		lblAlertActive.requestLayout();
 		lblAlertInactive.requestLayout();
 

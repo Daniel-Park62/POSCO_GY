@@ -268,8 +268,8 @@ public class AppMain extends ApplicationWindow {
 		Composite compos_t2 = new Composite(composite_t, SWT.NONE);
 		GridLayoutFactory.fillDefaults().numColumns(6).equalWidth(true).extendedMargins(20, 10,10,10).spacing(20, 5).applyTo(compos_t2);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(compos_t2);
-		Color[] bcl = {colact, colinact,colstr,colout, colwarn, collow } ; 
-		String[] slblt = {"정상","비활성","미설치","위험","경고","배터리"} ;
+		Color[] bcl = {colact, colinact,colstr, colwarn,colout, collow } ; 
+		String[] slblt = {"정상","통신이상","미설치","주의","경고","배터리"} ;
 		for (int i=0;i<6;i++) {
 			ltit = new Label(compos_t2, SWT.BORDER);
 			ltit.setText(" ");
@@ -279,7 +279,7 @@ public class AppMain extends ApplicationWindow {
 		for (int i=0;i<6;i++) {
 			ltit = new Label(compos_t2, SWT.CENTER);
 			ltit.setText(slblt[i]);
-			ltit.setFont(SWTResourceManager.getFont("Calibri", 8, SWT.BOLD));
+			ltit.setFont(SWTResourceManager.getFont("맑은 고딕", 8, SWT.BOLD));
 			ltit.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
 			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(ltit);
 		}
@@ -571,7 +571,7 @@ public class AppMain extends ApplicationWindow {
 	
 	public static int sendReload() {
 
-		String s = System.getenv("MONIP");
+		String s = System.getProperty("MONIP");
 		if (s == null)
 			s = "localhost";
 
@@ -598,7 +598,7 @@ public class AppMain extends ApplicationWindow {
 	public static int sendMeasur(String meas) {
 		
 		((MyThread) appmain.thread1).setInterval(Integer.parseInt(meas)) ;
-		String s = System.getenv("MONIP");
+		String s = System.getProperty("MONIP");
 		if (s == null)
 			s = "localhost";
 		System.out.println("MONIP:" + s);

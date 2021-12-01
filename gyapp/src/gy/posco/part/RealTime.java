@@ -494,7 +494,7 @@ public class RealTime  {
 		    case 7:
 		    	return String.format( "%.3f", mote.getBatt()/1000.0 );
 		    case 8:
-		    	return mote.getRtd() > mote.getTempD() ? "위험" : mote.getRtd() > mote.getTempW() ? "경고":"" ;
+		    	return mote.getRtd() > mote.getTempD() ? "경고" : mote.getRtd() > mote.getTempW() ? "주의":"" ;
 		    }
 			return null;
 		}

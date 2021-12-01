@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 //  console.info(req.query) ;
   if ( req.query.meas ) {
     child.send({"chgmeas": req.query.meas}) ;
-    console.info('time interval :', req.query.meas);
+    // console.info('time interval :', req.query.meas);
   }
 
  });

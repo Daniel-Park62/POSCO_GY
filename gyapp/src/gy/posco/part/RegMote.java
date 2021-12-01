@@ -416,7 +416,7 @@ public class RegMote {
 					em.getTransaction().begin();
 					em.merge(moteconfig);
 					em.getTransaction().commit();
-					AppMain.sendMeasur("10") ; 
+					AppMain.sendMeasur(lmeas+"") ; 
 					MessageDialog.openInformation(parent.getShell(), "Save Infomation", "수정되었습니다.");
 
 					passwordField.setText("");

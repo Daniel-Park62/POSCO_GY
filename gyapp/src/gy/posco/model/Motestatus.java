@@ -243,9 +243,9 @@ public class Motestatus  {
 	}
 	
 	public String getLocNmlong() {
-		if (cntgb == 1)   return "비접촉 " + stand + " STD" ;
+		if (cntgb == 1)   return "비접촉 #" + stand  ;
 		StringBuilder sb = new StringBuilder() ;
-		sb.append(stand + " STD ");
+		sb.append("#" + stand + " ");
 		sb.append(AppMain.getLocName(loc) + " " + tb) ;
 		
 		return sb.toString() ;

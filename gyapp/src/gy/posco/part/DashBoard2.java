@@ -170,7 +170,6 @@ public class DashBoard2 {
 			}
 		});
 
-
 		tvc = new TableViewerColumn(tvv, SWT.NONE);
 		tvc.getColumn().setWidth(100) ;
 		tvc.getColumn().setAlignment(SWT.LEFT);
@@ -186,10 +185,10 @@ public class DashBoard2 {
 			public Image getImage(Object element) {
 				if (element == null)  return super.getImage(element);
 				Moteinfo m = (Moteinfo)element ;
-
-				if (  m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() - 1000 ) 
+				if (  m.getBatt() == 0 ) return super.getImage(element) ;
+				if (  m.getBatt() < AppMain.MOTECNF.getBatt() - 1000 ) 
 					return AppMain.img_danger ;
-				else if (m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() )
+				else if ( m.getBatt() < AppMain.MOTECNF.getBatt() )
 					return AppMain.img_lowb ;
 				else
 					return AppMain.img_act ;
@@ -238,16 +237,16 @@ public class DashBoard2 {
 			}
 		});
 
-		tvc = new TableViewerColumn(tvv, SWT.NONE);
-		tvc.getColumn().setWidth(80) ;
-		tvc.getColumn().setAlignment(SWT.CENTER);
-		tvc.getColumn().setText("스위치");
-		tvc.setLabelProvider(new myColProvider() {
-			@Override
-			public String getText(Object element) {
-				return element == null ? "" : ((Moteinfo)element).getSwseq() > 0 ? ((Moteinfo)element).getSwseq() + "" : ""  ;
-			}
-		});
+//		tvc = new TableViewerColumn(tvv, SWT.NONE);
+//		tvc.getColumn().setWidth(80) ;
+//		tvc.getColumn().setAlignment(SWT.CENTER);
+//		tvc.getColumn().setText("스위치");
+//		tvc.setLabelProvider(new myColProvider() {
+//			@Override
+//			public String getText(Object element) {
+//				return element == null ? "" : ((Moteinfo)element).getSwseq() > 0 ? ((Moteinfo)element).getSwseq() + "" : ""  ;
+//			}
+//		});
 
 //		tvc = new TableViewerColumn(tv, SWT.NONE);
 //		tvc.getColumn().setWidth(300) ;

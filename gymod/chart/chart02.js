@@ -39,8 +39,8 @@ let standno=0 ;
 let categories = ['ahjhjkhj01','ajhhjdeed02','adssddsds03','adssdsddsds04','adsdsdssd05','afdfffd06','afdfdfd07','afdfdfdfd08','afdfdfdf09','afddffdfd10'];
 let chartx = {
     chart: {
-        height: 500 ,
-        zoomType: 'x',
+        height: 700 ,
+        // zoomType: 'x',
         type: 'spline',
         events: {
                    click: cclick
@@ -84,6 +84,7 @@ let chartx = {
       categories: categories
     },
     yAxis: {
+        min :0 , max :100, tickInterval : 5, 
         title: {
             text: null
         },
@@ -191,7 +192,7 @@ function updChart(qdata) {
     categories = obj.categorie ;
     chartx.xAxis.categories = obj.categorie ;
     chartx.xAxis.tickInterval = obj.categorie.length / 10 ;
-    changesize(700) ;
+    // changesize(700) ;
     chart = Highcharts.chart('container',chartx );
 
     // chart.reflow();

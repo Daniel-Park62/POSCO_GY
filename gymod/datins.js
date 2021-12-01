@@ -41,23 +41,20 @@ process.on("message", async (dat) => {
   }
   dat.chgmeas *= 1;
   if ( typeof dat.chgmeas == 'number' ) {
-    con.getConnection( conn => {
-      conn.query("SELECT measure, batt, updauto FROM MOTECONFIG LIMIT 1")
-      .then(row => {
-        MEAS = row[0].measure;
-        BATTL = row[0].batt;
-        UPDAUTO = row[0].updauto == 'Y';
-      })
-      .catch(err => console.error(err) )
-      .finally(() => { 
-        console.info('time interval :' , MEAS, " Battery Limit :" , BATTL, UPDAUTO );
-        conn.end() ;
-        console.log("Interval 변경:",MEAS) ;
-        clearTimeout(mainto) ;
-        mainto = setInterval( main_loop, MEAS * 1000 - 500) ;
-      });
+    con.query("SELECT measure, batt, updauto FROM MOTECONFIG LIMIT 1")
+    .then(row => {
+      MEAS = row[0].measure;
+      BATTL = row[0].batt;
+      UPDAUTO = row[0].updauto == 'Y';
+    })
+    .catch(err => console.error(err) )
+    .finally(() => { 
+      console.info('time interval :' , MEAS, " Battery Limit :" , BATTL, UPDAUTO );
+      console.log("Interval 변경:",MEAS) ;
+      clearTimeout(mainto) ;
+      mainto = setTimeout( main_loop, 2000) ;
+    });
 
-    }) ;
     ws_ss.forEach(ss => delete ss.Mac ) ;
     ds_ss.forEach(ss => delete ss.Mac ) ;
   }
@@ -142,7 +139,7 @@ function getDevs(con) {
         // console.log(mote);
         ws_ss.every((ss,i) => {
           if (ss[6] == d) {
-            if ( ss[5] == 'S' && ss.Mac == undefined  ) {
+            if ( ss[5] == 'S' && ss[8] == 'B' && ss.Mac == undefined  ) {
               ss.Mac = mote.mac.replace(/:/gi,'');
               ws_sensor_push(ss.Mac, ss[8] == 'B' ? ss[2] : 2 ) ;
             }
@@ -201,7 +198,7 @@ function getDevs(con) {
         // console.log(mote);
         ds_ss.every((ss,i) => {
           if (ss[6] == d) {
-            if ( ss[5] == 'S'   && ss.Mac == undefined ) {
+            if ( ss[5] == 'S' && ss[8] == 'B'  && ss.Mac == undefined ) {
               ss.Mac = mote.mac.replace(/:/gi,'');
               ds_sensor_push(ss.Mac, ss[8] == 'B' ? ss[2] : 2) ;
             }
@@ -259,7 +256,7 @@ function insTemp(con) {
               let mdata = new Uint16Array(d.data) ;
               if (ws_ss[i][8] == 'B' && mdata[3] != ws_ss[i][2] ) {
                 ws_ss[i][2] = mdata[3] ;
-                ws_sensor_push(ws_ss[i].Mac, ws_ss[i][2]) ;
+                if (ws_ss[i].Mac) ws_sensor_push(ws_ss[i].Mac, ws_ss[i][2]) ;
                 client.writeRegister(i*8+3, mdata[3] == 0 ? 9999 : MEAS ) 
                 .catch( e => console.error(e));
                 if (UPDAUTO) con.query("UPDATE motestatus set stand = ? where mmgb = '1' and seq = ?", [ws_ss[i][2], ws_ss[i][6]]);
@@ -418,8 +415,8 @@ async function main()  {
     let buff = ws_buffarr.shift() ;
     if (buff != undefined) setTimeout( ws_sensor_set,0,buff) ;
     let buff2 = ds_buffarr.shift() ;
-    if (buff2 != undefined) setTimeout( ds_sensor_set,10, buff2) ;
-   }, 5000) ;
+    if (buff2 != undefined) setTimeout( ds_sensor_set,0, buff2) ;
+   }, 2000) ;
   
   return "";
 }
@@ -499,43 +496,56 @@ function ws_sensor_set( buf1 ) {
       let ret = socket.write(buf1) ;
     } catch (e) {
       console.log("ws socket write error :", e);
-      ws_buffarr.push(buf1) ;
+      ws_buffarr.unshift(buf1) ;
+      socket.end();
     }
   } );
   socket.on('data', function (data) {
-      console.log(" *** ws Server return data : " , data.toString('hex'), Date() );
-      // if (data[8] != 0)          buffarr.push(buf1) ;
+      console.log(" *** %s: ws return data : %s" , moment().format('MM-DD HH:mm:ss') , data.toString('hex') );
       socket.end();
-//	socket.end();
   });
   socket.on('error', function (err) {
       // console.error(" *** ws Error : ", Date() ,buf1.toString('hex') , JSON.stringify(err));
-      ws_buffarr.push(buf1) ;
+      // ws_buffarr.unshift(buf1) ;
+      ws_sensor_set( buf1 ) 
   });
-
+  // writeData(socket, buf1) ;
 }
 
 function ds_sensor_set( buf1 ) {
 
   let socket = net.connect( {port : 40000, host: GWIP_DS}, () => {
 //      console.info(buf1.toString('hex'));
-    socket.setNoDelay(true);
+    // socket.setNoDelay(true);
     try {
       let ret = socket.write(buf1) ;
     } catch (e) {
       console.log("ds socket write error :", e);
-      ds_buffarr.push(buf1) ;
+      ds_buffarr.unshift(buf1) ;
+      socket.end();
     }
   } );
   socket.on('data', function (data) {
-      console.log(" *** ds Server return data : " , data.toString('hex'), Date() );
-      // if (data[8] != 0)          buffarr.push(buf1) ;
+    console.log(" *** %s: ds return data : %s" , moment().format('MM-DD HH:mm:ss') , data.toString('hex') );
+    // if (data[8] != 0)          buffarr.push(buf1) ;
       socket.end();
-//	socket.end();
   });
   socket.on('error', function (err) {
       // console.error(" *** ds Error : ", Date() ,buf1.toString('hex') , JSON.stringify(err));
-      ds_buffarr.push(buf1) ;
+      // ds_buffarr.unshift(buf1) ;
+      ds_sensor_set( buf1 );
   });
-
+  // writeData(socket, buf1) ;
 }
+/* 
+function writeData(socket, data){
+  var success = !socket.write(data);
+  if (!success){
+    (function(socket, data){
+      socket.once('drain', function(){
+        writeData(socket, data);
+      });
+    })(socket, data);
+  }
+}
+ */

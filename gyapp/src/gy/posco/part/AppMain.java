@@ -269,7 +269,7 @@ public class AppMain extends ApplicationWindow {
 		GridLayoutFactory.fillDefaults().numColumns(6).equalWidth(true).extendedMargins(20, 10,10,10).spacing(20, 5).applyTo(compos_t2);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(compos_t2);
 		Color[] bcl = {colact, colinact,colstr, colwarn,colout, collow } ; 
-		String[] slblt = {"정상","통신이상","미설치","주의","경고","배터리"} ;
+		String[] slblt = {"정상","비활성","미설치","주의","경고","배터리"} ;
 		for (int i=0;i<6;i++) {
 			ltit = new Label(compos_t2, SWT.BORDER);
 			ltit.setText(" ");

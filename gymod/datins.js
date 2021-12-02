@@ -415,7 +415,7 @@ async function main()  {
     let buff = ws_buffarr.shift() ;
     if (buff != undefined) setTimeout( ws_sensor_set,0,buff) ;
     let buff2 = ds_buffarr.shift() ;
-    if (buff2 != undefined) setTimeout( ds_sensor_set,0, buff2) ;
+    if (GWIP_WS != GWIP_DS && buff2 != undefined) setTimeout( ds_sensor_set,0, buff2) ;
    }, 2000) ;
   
   return "";

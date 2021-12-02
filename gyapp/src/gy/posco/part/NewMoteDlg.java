@@ -4,8 +4,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.swing.ButtonGroup;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.nebula.widgets.cdatetime.CDT;
 import org.eclipse.nebula.widgets.cdatetime.CDateTime;
 import org.eclipse.swt.SWT;
@@ -34,8 +37,9 @@ public class NewMoteDlg extends Dialog {
 	private Text txtSeq ;
 	private Text txtBno ;
 	private Text txtDesc ;
+	private Text txtLocnm ;
 	private CDateTime cdate ;
-	private Button buttonS , buttonR , btnNo, btnYes, btnWS, btnDS, btnIMR, btnWR, btnBUR, btnTOP, btnBOTTOM , btnCnt, btnUCnt ;
+	private Button buttonS , buttonR , btnNo, btnYes, btnWS, btnDS, btnIMR, btnWR, btnBUR, btnTOP, btnBOTTOM , btnCnt, btnUCnt , btnNone1, btnNone2;
 	private Spinner spstand ;
 	private DateFormat dateFmt1 = new SimpleDateFormat("yyyy-MM-dd");	
 	final Font font = SWTResourceManager.getFont("Calibri", 14, SWT.NORMAL);
@@ -203,12 +207,14 @@ public class NewMoteDlg extends Dialog {
         lblSno = new Label(container, SWT.NONE  );
         lblSno.setFont(font);
         lblSno.setText("Stand No:");
-        lblSno.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+//        lblSno.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+        GridDataFactory.fillDefaults().align(SWT.RIGHT, SWT.CENTER).grab(false, false).applyTo(lblSno);
 		spstand = new Spinner(container,SWT.BORDER ) ;
 		spstand.setFont(font);
 		spstand.setSelection(1);
 		spstand.setMaximum(5);
-		spstand.computeSize(200, -1);
+//		spstand.computeSize(200, -1);
+        GridDataFactory.fillDefaults().hint(50,-1).align(SWT.LEFT, SWT.CENTER).applyTo(spstand);
 
         Label label_3 = new Label(container, SWT.NONE);
         label_3.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -219,6 +225,9 @@ public class NewMoteDlg extends Dialog {
         gloc.setLayout(new RowLayout(SWT.HORIZONTAL));
         gloc.setFont(new Font(null, "", 1, SWT.NORMAL));
  
+        btnNone1 = new Button(gloc, SWT.RADIO);
+        btnNone1.setText("None");        
+        btnNone1.setFont(font);
         btnIMR = new Button(gloc, SWT.RADIO);
         btnIMR.setText("IMR");        
         btnIMR.setFont(font);
@@ -238,12 +247,26 @@ public class NewMoteDlg extends Dialog {
         gtb.setLayout(new RowLayout(SWT.HORIZONTAL));
         gtb.setFont(new Font(null, "", 1, SWT.NORMAL));
  
+        btnNone2 = new Button(gtb, SWT.RADIO);
+        btnNone2.setText("None");        
+        btnNone2.setFont(font);
+
         btnTOP = new Button(gtb, SWT.RADIO);
         btnTOP.setText("TOP");        
         btnTOP.setFont(font);
         btnBOTTOM = new Button(gtb, SWT.RADIO);
         btnBOTTOM.setText("BOTTOM");        
         btnBOTTOM.setFont(font);
+        
+        new Label(container, SWT.NONE);
+        txtLocnm = new Text(container, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(txtLocnm);
+        txtLocnm.setFont(font);
+        txtLocnm.addModifyListener(e -> {
+        	Text textWidget = (Text) e.getSource();
+        	mote.setLocnm(textWidget.getText());
+        });
+        
         
         setValue();
 
@@ -260,7 +283,7 @@ public class NewMoteDlg extends Dialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(500, 500);
+        return new Point(550, 550);
     }
 
     @Override
@@ -271,13 +294,13 @@ public class NewMoteDlg extends Dialog {
     	}
     	
     	mote.setBno(Short.parseShort(txtBno.getText()));
-    	mote.setDescript(txtDesc.getText());
+//    	mote.setDescript(txtDesc.getText());
     	mote.setGubun(buttonS.getSelection() ? "S" : "R");
     	mote.setSpare(btnYes.getSelection() ? "Y" : "N");
    		mote.setBattDt(cdate.getSelection());
     	mote.setStand((short) spstand.getSelection() );
-    	mote.setLoc(btnIMR.getSelection() ? "I" : btnWR.getSelection() ? "W" : "B") ;
-    	mote.setTb(btnTOP.getSelection() ? "T" : "B");
+    	mote.setLoc(btnIMR.getSelection() ? "I" : btnWR.getSelection() ? "W" : btnBUR.getSelection() ? "B" : "") ;
+    	mote.setTb(btnTOP.getSelection() ? "T" : btnBOTTOM.getSelection() ? "B": "");
     	mote.setCntgb((short)(btnCnt.getSelection() ? 0 : 1));
     	AppMain.sendReload() ;
         super.okPressed();
@@ -313,8 +336,13 @@ public class NewMoteDlg extends Dialog {
 	    btnIMR.setSelection(mote.getLoc().equals("I"));
 	    btnBUR.setSelection(mote.getLoc().equals("B"));
 	    btnWR.setSelection(mote.getLoc().equals("W"));
+	    btnNone1.setSelection( mote.getLoc().length() == 0 );
+	    
 	    btnTOP.setSelection(mote.getTb().equals("T"));
 	    btnBOTTOM.setSelection(mote.getTb().equals("B"));
+	    
+	    btnNone2.setSelection( mote.getTb().length() == 0 );
+	    txtLocnm.setText(mote.getLocnm());
 	    btnCnt.setSelection(mote.getCntgb() == 0 );
 	    btnUCnt.setSelection(mote.getCntgb() != 0 );
         

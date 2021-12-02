@@ -6,9 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
 
@@ -44,7 +41,7 @@ public class DashBoard {
     Label lblTagActive;
     Label lblTagInactive;
     Label lblAlertActive;
-    Label lblAlertInactive;
+    Label lblAlertInactive , lblAlertWarn;
     
 //    DateFormat dateFmt2 = new SimpleDateFormat("HH:mm:ss");
     Font font1 = SWTResourceManager.getFont("HY견고딕", 24 , SWT.BOLD ) ;
@@ -57,17 +54,17 @@ public class DashBoard {
     Standcl[] standcl = new Standcl[5];
 	List<Motestatus > motelist ;
 
-	int activeCnt = 0;
-	int inactiveCnt = 0;
-
-	int activeSsCnt = 0;
-	int failCnt = 0;
-	int moteLBCnt = 0;
-	int oBCnt = 0;
-
 	private Date time_c = null;
     EntityManager em = AppMain.emf.createEntityManager();
 
+    private void label_cre1(Composite comp, int x, int y, String s) {
+		Label lblT = new Label(comp, SWT.NONE);
+		lblT.setAlignment(SWT.RIGHT);
+		lblT.setFont(SWTResourceManager.getFont("맑은 고딕", 11, SWT.BOLD ));
+		lblT.setBounds(x, y, 50, 20);
+		lblT.setText(s);
+		lblT.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
+    }
 	public DashBoard(Composite parent, int style) {
 
 //		super(parent, style) ;
@@ -97,45 +94,57 @@ public class DashBoard {
 		lblApActive = new Label(composite_l1, SWT.NONE);
 		lblApActive.setAlignment(SWT.RIGHT);
 		lblApActive.setFont(font2);
-		lblApActive.setBounds(340, iy, 40, 20);
+		lblApActive.setBounds(335, iy, 40, 20);
 		lblApActive.setText("99");
+		label_cre1(composite_l1, 380,iy, "정상") ;
 		
 		lblApInactive = new Label(composite_l1, SWT.NONE);
 		lblApInactive.setAlignment(SWT.RIGHT);
 		lblApInactive.setFont(font2);
-		lblApInactive.setBounds(340, iy+25 , 40, 20);
+		lblApInactive.setBounds(335, iy+25 , 40, 20);
 		lblApInactive.setText("99");
-		
+		label_cre1(composite_l1, 380,iy+23, "비활성") ;
+
 		lblTagActive = new Label(composite_l1, SWT.NONE);
 		lblTagActive.setAlignment(SWT.RIGHT);
 		lblTagActive.setFont(font2);
-		lblTagActive.setBounds(550, iy, 40, 20);
+		lblTagActive.setBounds(540, iy, 40, 20);
 		lblTagActive.setText("99");
+		label_cre1(composite_l1, 585,iy, "정상") ;
 		
 		lblTagInactive = new Label(composite_l1, SWT.NONE);
 		lblTagInactive.setAlignment(SWT.RIGHT);
 		lblTagInactive.setFont(font2);
-		lblTagInactive.setBounds(550, iy+25, 40, 20);
+		lblTagInactive.setBounds(540, iy+25, 40, 20);
 		lblTagInactive.setText(" 0");
-		
-		lblAlertActive = new Label(composite_l1, SWT.NONE);
-		lblAlertActive.setAlignment(SWT.LEFT);
-		lblAlertActive.setFont(font12B);
-		lblAlertActive.setBounds(740, iy, 150, 20);
-		lblAlertActive.setText(" 0      ");
-		lblAlertActive.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
-		lblAlertActive.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
+		label_cre1(composite_l1, 585,iy+23, "비정상") ;
+
+		lblAlertWarn = new Label(composite_l1, SWT.NONE);
+		lblAlertWarn.setAlignment(SWT.LEFT);
+		lblAlertWarn.setFont(font12B);
+		lblAlertWarn.setBounds(750, iy-5, 150, 20);
+		lblAlertWarn.setText(" 0      ");
+		lblAlertWarn.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+		lblAlertWarn.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
 //		lblAlertActive.setCursor(AppMain.handc);
 
 		lblAlertInactive = new Label(composite_l1, SWT.NONE);
 		lblAlertInactive.setAlignment(SWT.LEFT);
 		lblAlertInactive.setFont(font12B);
-		lblAlertInactive.setBounds(740, iy+25, 150, 20);
+		lblAlertInactive.setBounds(750, iy+25, 150, 20);
 		lblAlertInactive.setText(" 0      ");
 		lblAlertInactive.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
 		lblAlertInactive.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 //		lblAlertInactive.setCursor(AppMain.handc);
-		
+
+		lblAlertActive = new Label(composite_l1, SWT.NONE);
+		lblAlertActive.setAlignment(SWT.LEFT);
+		lblAlertActive.setFont(font12B);
+		lblAlertActive.setBounds(960, iy+10, 160, 20);
+		lblAlertActive.setText("        ");
+		lblAlertActive.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
+		lblAlertActive.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
+
 		Label btnlow = new Label(composite_l1, 0) ;
 		
 		btnlow.setBounds(1256, iy, 50,60);
@@ -391,20 +400,15 @@ public class DashBoard {
 						clunc[0].setText(String.format("%.1f", mote.getRtd1()));
 						clunc[1].setText(String.format("%.1f", mote.getRtd2()));
 						clunc[2].setText(String.format("%.1f", mote.getRtd3()));
-						label_col_set(clunc[0], mote.getAct() == 0 ? -1 
-						: mote.getStatus() == 0 && mote.getBatt() < AppMain.MOTECNF.getBatt() ? -2 : mote.getStatus());
-
-						label_col_set(clunc[1], mote.getAct() == 0 ? -1 
-						: mote.getStatus2() == 0 && mote.getBatt() < AppMain.MOTECNF.getBatt() ? -2 : mote.getStatus2());
-						label_col_set(clunc[2], mote.getAct() == 0 ? -1 
-						: mote.getStatus3() == 0 && mote.getBatt() < AppMain.MOTECNF.getBatt() ? -2 : mote.getStatus3());
+						label_col_set(clunc[0], mote.getAct() == 0 ? -1 : mote.getStatus());
+						label_col_set(clunc[1], mote.getAct() == 0 ? -1 : mote.getStatus2());
+						label_col_set(clunc[2], mote.getAct() == 0 ? -1 : mote.getStatus3());
 						
 					} else {
 						clunc[3].setText(String.format("%.1f", mote.getRtd1()));
 						clunc[4].setText(String.format("%.1f", mote.getRtd2()));
 						label_col_set(clunc[3], mote.getAct() == 0 ? -1 : mote.getStatus());
 						label_col_set(clunc[4], mote.getAct() == 0 ? -1 : mote.getStatus2());
-
 					}
 				}
 		});
@@ -440,8 +444,8 @@ public class DashBoard {
 					: sts == 1 ? AppMain.colwarn  
 					: sts == -1 ? AppMain.colinact 
 					: sts == -2 ? AppMain.collow 
-					: SWTResourceManager.getColor(SWT.COLOR_GREEN);
-			Color fcl = sts == 2 ? SWTResourceManager.getColor(SWT.COLOR_YELLOW)
+					: AppMain.colact ;
+			Color fcl = cl == AppMain.colout ? SWTResourceManager.getColor(SWT.COLOR_YELLOW)
 					: SWTResourceManager.getColor(SWT.COLOR_BLACK);
 			
 			cbl.setBackground(cl);
@@ -510,27 +514,32 @@ public class DashBoard {
 
 		motelist = em.createQuery("select m from Motestatus m where m.spare = 'N'", Motestatus.class).getResultList() ;
 
-		activeCnt = 0;
-		inactiveCnt = 0;
-		activeSsCnt = 0;
-		failCnt = 0;
-		moteLBCnt = 0;
-		oBCnt = 0;
+		int activeCnt = 0;
+		int inactiveCnt = 0;
+
+		int activeSsCnt = 0;
+		int failCnt = 0;
+		int moteLBCnt = 0;
+		int oBCnt = 0;
+
+		int wCnt = 0 ;
 
 		activeCnt = (int) motelist.stream().filter(m -> m.getAct() == 2).count() ;
 		inactiveCnt = (int) motelist.stream().filter(m -> m.getAct() != 2).count() ;
 		activeSsCnt = (int) motelist.stream().filter(m -> m.getAct() == 2 && m.getGubun().equals("S") ).count() ;
-		failCnt = (int) motelist.stream().filter(m -> m.getAct() != 2 && m.getGubun().equals("S") ).count() ;
-		moteLBCnt = (int) motelist.stream().filter( m -> m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() ).count() ;
+		failCnt = (int) moteinfo.stream().filter(m -> m.getAct() == 2 && m.getGubun().equals("S") && m.getRtd() == 0 ).count() ;
+		moteLBCnt = (int) motelist.stream().filter( m -> m.getCntgb() == 0 && m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() ).count() ;
 		oBCnt = (int) motelist.stream().filter(m -> m.getStatus() > 1 ).count() ;
+		wCnt = (int) motelist.stream().filter(m -> m.getStatus() == 1 ).count() ;
 		
-		lblApActive.setText(activeCnt+"");
+		lblApActive.setText(activeCnt+    "");
 		lblApInactive.setText(inactiveCnt+"");
 
 		lblTagActive.setText(activeSsCnt+"");
 		lblTagInactive.setText(failCnt+"");
 		lblAlertActive.setText(String.format  ("%.1fV 미만: %2d건", AppMain.MOTECNF.getBatt() /1000.0, moteLBCnt));
-		lblAlertInactive.setText(String.format("%d℃ 초과: %2d건",(int) motest.get(0).getTempD(), oBCnt) );
+		lblAlertWarn.setText(String.format("주의 : %2d건", wCnt) );
+		lblAlertInactive.setText(String.format("경고 : %2d건", oBCnt) );
 		lblAlertActive.requestLayout();
 		lblAlertInactive.requestLayout();
 

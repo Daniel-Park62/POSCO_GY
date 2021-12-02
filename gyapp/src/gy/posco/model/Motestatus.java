@@ -41,6 +41,7 @@ public class Motestatus  {
 	private short stand;
 	private String loc = "I";
 	private String tb  = "T";
+	private String locnm ;
 	
 	@Column(updatable=false, insertable=false)
 	private short act;
@@ -198,8 +199,12 @@ public class Motestatus  {
 		return loc;
 	}
 
-	public String getLocNm() {
-		return loc;
+	public String getLocnm() {
+		return locnm == null ? "" : locnm;
+	}
+
+	public void setLocnm(String locnm) {
+		this.locnm = locnm;
 	}
 
 	public void setLoc(String loc) {
@@ -243,6 +248,9 @@ public class Motestatus  {
 	}
 	
 	public String getLocNmlong() {
+		if (locnm.length() > 0 && (cntgb == 1 || gubun.equals("R"))) {
+			return locnm ;
+		}
 		if (cntgb == 1)   return "비접촉 #" + stand  ;
 		StringBuilder sb = new StringBuilder() ;
 		sb.append("#" + stand + " ");

@@ -49,9 +49,22 @@ public class Motehist  {
 	private float rtd2;
 	private float rtd3;
 	private float temp;
+	private String gubun;
+	public String getGubun() {
+		return gubun;
+	}
 
 	private short stand;
 	private String loc;
+	private String locnm;
+	public String getLocnm() {
+		return locnm == null ? "" : locnm;
+	}
+
+	public void setLocnm(String locnm) {
+		this.locnm = locnm;
+	}
+
 	private String tb;
 	private String chocknm;
 	public String getChocknm() {
@@ -154,31 +167,34 @@ public class Motehist  {
 	public int getStatus() {
 		int sts = 0 ;
 
-		if ( rtd1>0 && rtd1 > tempD ) 
+		if ( rtd1>0 && rtd1 >= tempD ) 
 			sts = 2 ;
-		else if ( rtd1>0 && rtd1 > tempW )
+		else if ( rtd1>0 && rtd1 >= tempW )
 			sts = 1 ;
 		return sts ;
 	}
 	public int getStatus2() {
 		int sts = 0 ;
 
-		if ( rtd2>0 && rtd2 > tempD ) 
+		if ( rtd2>0 && rtd2 >= tempD ) 
 			sts = 2 ;
-		else if ( rtd2>0 && rtd2 > tempW )
+		else if ( rtd2>0 && rtd2 >= tempW )
 			sts = 1 ;
 		return sts ;
 	}
 	public int getStatus3() {
 		int sts = 0 ;
 
-		if ( rtd3>0 && rtd3 > tempD ) 
+		if ( rtd3>0 && rtd3 >= tempD ) 
 			sts = 2 ;
-		else if ( rtd3>0 && rtd3 > tempW )
+		else if ( rtd3>0 && rtd3 >= tempW )
 			sts = 1 ;
 		return sts ;
 	}
 	public String getLocNmlong() {
+		if (getLocnm().length() > 0 && (cntgb == 1 || gubun.equals("R"))) {
+			return getLocnm() ;
+		}
 		if (cntgb == 1)   return "비접촉 #" + stand  ;
 		StringBuilder sb = new StringBuilder() ;
 		sb.append("#"+ stand + " ");

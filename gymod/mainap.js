@@ -33,6 +33,12 @@ app.get('/reload', (req, res) => {
   console.info('getMeasure() call ');
 });
 
+app.get('/reset', (req, res) => {
+  res.send('<h2>측정주기 reset</h2>\n');
+  child.send({"resetmeas": 1}) ;
+ console.info('측정주기 reset');
+});
+
 app.listen(port, function () {
   console.log('listening on port:' + port);
 });

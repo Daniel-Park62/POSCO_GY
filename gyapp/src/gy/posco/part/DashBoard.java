@@ -217,7 +217,7 @@ public class DashBoard {
 		lnm.pack();
 		
 		Composite composite_2 = new Composite(composite2, SWT.NONE);
-		GridLayoutFactory.fillDefaults().margins(0, 5).equalWidth(true).spacing(40, 20).numColumns(5).applyTo(composite_2);
+		GridLayoutFactory.fillDefaults().margins(0, 5).equalWidth(true).spacing(35, 20).numColumns(5).applyTo(composite_2);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(composite_2) ;
 //		composite_2.setBackground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
 		
@@ -299,7 +299,7 @@ public class DashBoard {
 					cltemp[j][i].setText(" 0.0");
 					cltemp[j][i].setFont(font2);
 					cltemp[j][i].setBackground(AppMain.colstr) ;
-					GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(55, 30).applyTo(cltemp[j][i]);
+					GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(60, 30).applyTo(cltemp[j][i]);
 				}
 			clb[0] = new CLabel(comp_s, SWT.CENTER );
 			clb[1] = new CLabel(comp_s, SWT.CENTER );
@@ -319,7 +319,7 @@ public class DashBoard {
 				clunc[i].setText(" 0.0");
 				clunc[i].setFont(font12);
 				clunc[i].setBackground(AppMain.colstr) ;
-				GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(40, -1).applyTo(clunc[i]);
+				GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(45, -1).applyTo(clunc[i]);
 			}
 			comp_s2.requestLayout();
 			comp_s3 = new Composite(comp, SWT.NONE) ;
@@ -391,7 +391,7 @@ public class DashBoard {
 
 					if (i > 1 || j > 5 || i < 0 || j < 0) return ;
 					cltemp[i][j].setText(String.format("%.1f", mote.getRtd1()));
-					label_col_set(cltemp[i][j], mote.getAct() == 0 ? -1 
+					label_col_set(cltemp[i][j], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd1() == 0 ? 1 
 							: mote.getStatus() == 0 && mote.getBatt() < AppMain.MOTECNF.getBatt() ? -2 : mote.getStatus());
 					if (j == 0 ) clt[i].setText( mote.getChocknm() ); 
 					if (j == 5 ) clb[i].setText( mote.getChocknm() );  
@@ -400,15 +400,15 @@ public class DashBoard {
 						clunc[0].setText(String.format("%.1f", mote.getRtd1()));
 						clunc[1].setText(String.format("%.1f", mote.getRtd2()));
 						clunc[2].setText(String.format("%.1f", mote.getRtd3()));
-						label_col_set(clunc[0], mote.getAct() == 0 ? -1 : mote.getStatus());
-						label_col_set(clunc[1], mote.getAct() == 0 ? -1 : mote.getStatus2());
-						label_col_set(clunc[2], mote.getAct() == 0 ? -1 : mote.getStatus3());
+						label_col_set(clunc[0], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd1() == 0 ? 1 : mote.getStatus());
+						label_col_set(clunc[1], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd2() == 0 ? 1 :mote.getStatus2());
+						label_col_set(clunc[2], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd3() == 0 ? 1 :mote.getStatus3());
 						
 					} else {
 						clunc[3].setText(String.format("%.1f", mote.getRtd1()));
 						clunc[4].setText(String.format("%.1f", mote.getRtd2()));
-						label_col_set(clunc[3], mote.getAct() == 0 ? -1 : mote.getStatus());
-						label_col_set(clunc[4], mote.getAct() == 0 ? -1 : mote.getStatus2());
+						label_col_set(clunc[3], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd1() == 0 ? 1 : mote.getStatus());
+						label_col_set(clunc[4], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd2() == 0 ? 1 : mote.getStatus2());
 					}
 				}
 		});
@@ -445,7 +445,7 @@ public class DashBoard {
 					: sts == -1 ? AppMain.colinact 
 					: sts == -2 ? AppMain.collow 
 					: AppMain.colact ;
-			Color fcl = cl == AppMain.colout ? SWTResourceManager.getColor(SWT.COLOR_YELLOW)
+			Color fcl = sts == 2 ? SWTResourceManager.getColor(SWT.COLOR_YELLOW)
 					: SWTResourceManager.getColor(SWT.COLOR_BLACK);
 			
 			cbl.setBackground(cl);
@@ -524,13 +524,23 @@ public class DashBoard {
 
 		int wCnt = 0 ;
 
-		activeCnt = (int) motelist.stream().filter(m -> m.getAct() == 2).count() ;
-		inactiveCnt = (int) motelist.stream().filter(m -> m.getAct() != 2).count() ;
-		activeSsCnt = (int) motelist.stream().filter(m -> m.getAct() == 2 && m.getGubun().equals("S") ).count() ;
-		failCnt = (int) moteinfo.stream().filter(m -> m.getAct() == 2 && m.getGubun().equals("S") && m.getRtd() == 0 ).count() ;
-		moteLBCnt = (int) motelist.stream().filter( m -> m.getCntgb() == 0 && m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() ).count() ;
-		oBCnt = (int) motelist.stream().filter(m -> m.getStatus() > 1 ).count() ;
-		wCnt = (int) motelist.stream().filter(m -> m.getStatus() == 1 ).count() ;
+		for(Motestatus m : motelist) {
+			activeCnt += m.getAct() == 2 ? 1:0;
+			inactiveCnt += m.getAct() != 2 ? 1:0;
+			activeSsCnt += m.getAct() == 2 && m.getGubun().equals("S") ? 1:0;
+			moteLBCnt += m.getCntgb() == 0 && m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() ? 1:0;
+		}
+		for(Moteinfo m: moteinfo ) {
+			oBCnt += m.getStatus() > 1 ? 1 :0;
+			oBCnt += m.getCntgb() == 1 && m.getStatus2() > 1 ? 1 :0;
+			oBCnt += m.getCntgb() == 1 && m.getMmgb().equals("1") && m.getStatus3() > 1 ? 1 :0;
+			wCnt += m.getStatus() == 1 ? 1 :0;
+			wCnt += m.getCntgb() == 1 && m.getStatus2() == 1 ? 1 :0;
+			wCnt += m.getCntgb() == 1 && m.getSeq() % 2 == 1 && m.getStatus3() == 1 ? 1 :0;
+			failCnt +=  m.getAct() == 2 && m.getRtd1() == 0 ? 1 : 0; 
+			failCnt +=  m.getCntgb() == 1 && m.getAct() == 2 && m.getRtd2() == 0 ? 1 : 0; 
+			failCnt +=  m.getCntgb() == 1 && m.getSeq() % 2 == 1 && m.getAct() == 2 && m.getRtd3() == 0 ? 1 : 0; 
+		}
 		
 		lblApActive.setText(activeCnt+    "");
 		lblApInactive.setText(inactiveCnt+"");

@@ -39,6 +39,12 @@ process.on("message", async (dat) => {
     setImmediate(getMeasure) ;
     return ;
   }
+  if (dat.resetmeas) {
+    ws_ss.forEach(ss => { ss[8] == 'B' && ss.Mac && ws_sensor_push(ss.Mac,  1) }  ) ;
+    ds_ss.forEach(ss => { ss[8] == 'B' && ss.Mac && ds_sensor_push(ss.Mac,  1) }  ) ;
+    return ;
+  }
+
   dat.chgmeas *= 1;
   if ( typeof dat.chgmeas == 'number' ) {
     con.query("SELECT measure, batt, updauto FROM MOTECONFIG LIMIT 1")
@@ -55,8 +61,8 @@ process.on("message", async (dat) => {
       mainto = setTimeout( main_loop, 2000) ;
     });
 
-    ws_ss.forEach(ss => delete ss.Mac ) ;
-    ds_ss.forEach(ss => delete ss.Mac ) ;
+    ws_ss.forEach(ss => { ss[8] == 'B' && ss.Mac && ss[2] && ws_sensor_push(ss.Mac,  1) }  );
+    ds_ss.forEach(ss => { ss[8] == 'B' && ss.Mac && ss[2] && ds_sensor_push(ss.Mac,  1) }  )
   }
   
 });
@@ -100,7 +106,6 @@ function getMeasure() {
       console.info('last time :' + svtime.format('YYYY-MM-DD HH:mm:ss'));
     })
     .catch(err => { svtime = moment() ; console.log(err)});
-
 
 }
 

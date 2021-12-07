@@ -36,7 +36,7 @@ public class DashBoard2 {
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     Font font1 = SWTResourceManager.getFont("Tahoma", 22, SWT.BOLD  ) ;
     Font font2 = SWTResourceManager.getFont("맑은 고딕", 13, SWT.NORMAL);
-    Font font13 = SWTResourceManager.getFont("Calibri", 13, SWT.NORMAL ) ;
+    Font font13 = SWTResourceManager.getFont("맑은 고딕", 14, SWT.NORMAL ) ;
     Font font12 = SWTResourceManager.getFont("맑은 고딕", 12, SWT.NORMAL ) ;
     
 	
@@ -61,19 +61,26 @@ public class DashBoard2 {
 		lbl.setText("스탠드별 센서상태");
 		lbl.setFont(font1);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.TOP).applyTo(lbl);
-		lbl = new CLabel(composite_l, SWT.NONE);
-		lbl.setText("Work side												Drive side");
-		lbl.setFont(font2);
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.TOP).applyTo(lbl);
 		
 		Composite composite_d = new Composite(composite, SWT.NONE);
-		GridLayoutFactory.fillDefaults().margins(10, -1).numColumns(2).equalWidth(true).applyTo(composite_d);
+		GridLayoutFactory.fillDefaults().margins(10, 0).numColumns(2).equalWidth(true).applyTo(composite_d);
 		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(composite_d);
+
+		lbl = new CLabel(composite_d, SWT.NONE);
+		lbl.setText("▼ Work side");
+		lbl.setFont(font13);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.BOTTOM).applyTo(lbl);
+		lbl = new CLabel(composite_d, SWT.NONE);
+		lbl.setText("▼ Drive side");
+		lbl.setFont(font13);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.BOTTOM).applyTo(lbl);
 
 		tv = new TableViewer(composite_d, SWT.BORDER | SWT.VIRTUAL | SWT.HIDE_SELECTION );
 		create_table(tv) ;
 		tv2 = new TableViewer(composite_d, SWT.BORDER | SWT.VIRTUAL | SWT.HIDE_SELECTION );
 		create_table(tv2) ;
+//		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(tv.getTable());
+//		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(tv2.getTable());
 		
 		refreshSensorList();
 		composite_d.layout();
@@ -197,7 +204,7 @@ public class DashBoard2 {
 		});
 
 		tvc = new TableViewerColumn(tvv, SWT.LEFT);
-		tvc.getColumn().setWidth(100) ;
+		tvc.getColumn().setWidth(110) ;
 		tvc.getColumn().setAlignment(SWT.LEFT);
 		tvc.getColumn().setText("상태정보");
 		tvc.setLabelProvider(new myColProvider() {

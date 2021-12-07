@@ -67,7 +67,7 @@ public class RegStand2 extends Dialog {
 		// TODO Auto-generated constructor stub
 	}
 
-	String[] cols = { "", "설치위치", "", "경고온도", "", "위험온도", "", "표시범위(시간)" };
+	String[] cols = { "", "설치위치", "", "주의온도", "", "경고온도", "", "표시범위(시간)" };
 //	String[] PROPS = { "","1", "2", "3","4"}; 
 
 	@Override

@@ -5,10 +5,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -19,8 +19,6 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.persistence.config.HintValues;
-import org.eclipse.persistence.config.QueryHints;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.MouseAdapter;
@@ -50,7 +48,6 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.ibm.icu.util.Calendar;
 
 import gy.posco.model.Motehist;
-import gy.posco.model.Moteinfo;
 
 public class RealTime  {
 
@@ -65,7 +62,7 @@ public class RealTime  {
 		@Override
 		public Object[] getElements(Object input) {
 			//return new Object[0];
-			return ((ArrayList<Motehist>)input).toArray();
+			return ((List<Motehist>)input).toArray();
 		}
 		@Override
 		public void dispose() {
@@ -402,15 +399,18 @@ public class RealTime  {
 		else if ( ! btnWS.getSelection() && btnDS.getSelection()) 
 			sseqif += " and t.mmgb = '2' " ;
 		
-		ArrayList<Motehist> tempList2 = new ArrayList<Motehist>();
-        TypedQuery<Motehist> qMotes = em.createQuery("select t from Motehist t " 
-        		+ "where t.tm between :fmdt and :todt " + sseqif + " order by t.mmgb, t.seq, t.bno, t.stand, t.loc, t.tm desc"
-        		, Motehist.class);
-
-        qMotes.setParameter("fmdt", fmdt);
-        qMotes.setParameter("todt", todt);
-        qMotes.setHint(QueryHints.READ_ONLY, HintValues.TRUE);
-        qMotes.getResultList().stream().forEach( t -> tempList2.add(t));
+//		List<Motehist> tempList2 = new ArrayList<Motehist>();
+//		ArrayList<Motehist> tempList2 = new ArrayList<Motehist>();
+		List<Motehist>  tempList2 = em.createNativeQuery("select t.* from vMotehist t " 
+        		+ "where t.tm between ?1 and ?2 " + sseqif + " group by t.mmgb, t.seq, t.rtd1, t.stand, t.loc order by t.mmgb, t.seq, t.tm desc, t.stand, t.loc "
+        		, Motehist.class)
+				.setParameter(1, fmdt)
+				.setParameter(2, todt)
+				.getResultList();
+//		tempList2.setParameter("fmdt", fmdt);
+//        qMotes.setParameter("todt", todt);
+//        qMotes.setHint(QueryHints.READ_ONLY, HintValues.TRUE);
+//        qMotes.getResultList(); // .stream().forEach( t -> tempList2.add(t));
         
         tv.setInput(tempList2);
         

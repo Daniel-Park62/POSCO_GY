@@ -37,6 +37,9 @@ public class Motestatus  {
 	private short bno ;
 	private short cntgb ;
 	private short swseq ;
+	private short errflag1 ;
+	private short errflag2 ;
+	private short errflag3 ;
 	
 	private short stand;
 	private String loc = "I";
@@ -258,6 +261,18 @@ public class Motestatus  {
 		
 		return sb.toString() ;
 		
+	}
+
+	public short getErrflag1() {
+		return errflag1;
+	}
+
+	public short getErrflag2() {
+		return errflag2;
+	}
+
+	public short getErrflag3() {
+		return errflag3;
 	}
 
 }

@@ -9,7 +9,7 @@ const pool = mariadb.createPool({
       database: config.database,
       idleTimeout : 60,
       acquireTimeout : 180000,
-      connectionLimit: 5
+      connectionLimit: 10
 }) ;
 
 module.exports = {

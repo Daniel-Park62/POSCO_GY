@@ -452,7 +452,7 @@ public class ViewChart {
 		}
 		StringBuilder sbr = new StringBuilder() ;
 		sbr.append("stand = " + sstd.getSelection()) ;
-//		refreshData(sfrom, sto) ;
+
 		if ( !btnWS.getSelection() || !btnDS.getSelection())
 			sbr.append(" and mmgb = " + ( btnWS.getSelection() ? "'1'" : "'2'"));
 		if ( !btnT.getSelection() || !btnB.getSelection())

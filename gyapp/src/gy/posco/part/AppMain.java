@@ -74,8 +74,9 @@ public class AppMain extends ApplicationWindow {
 	final public static Color collow = SWTResourceManager.getColor(245, 174, 0);
 	final public static Color colout = SWTResourceManager.getColor(SWT.COLOR_RED);
 	final public static Color colwarn = SWTResourceManager.getColor(SWT.COLOR_YELLOW);
+	final public static Color colabn = SWTResourceManager.getColor(255,174,201);
 	final public static Color coltblh = SWTResourceManager.getColor(222, 239, 247);
-
+	
 	final Font font2b = SWTResourceManager.getFont("Calibri", 14, SWT.BOLD);
 
 	public IcallFunc callf = null;
@@ -89,6 +90,7 @@ public class AppMain extends ApplicationWindow {
 	public static Image img_danger ; // = resizeImg( AppMain.getMyimage("icon_danger.png"), 25,25);
 	public static Image img_warn ; // = resizeImg( AppMain.getMyimage("icon_warn.png"), 25,25);
 	public static Image img_lowb ; // = resizeImg( AppMain.getMyimage("lowbatt.png"), 25,25);
+	public static Image img_abn ;
 
 	Label lblDate;
 	Label lblinterval;
@@ -120,6 +122,7 @@ public class AppMain extends ApplicationWindow {
 		img_danger = AppMain.resizeImg(AppMain.getMyimage("icon_danger.png"), 25, 25);
 		img_warn = AppMain.resizeImg(AppMain.getMyimage("icon_warn.png"), 25, 25);
 		img_lowb = AppMain.resizeImg(AppMain.getMyimage("icon_lowb.png"), 25, 25);
+		img_abn = AppMain.resizeImg(AppMain.getMyimage("icon_abn.png"), 25, 25);
 //		addStatusLine();
 	}
 
@@ -268,8 +271,8 @@ public class AppMain extends ApplicationWindow {
 		Composite compos_t2 = new Composite(composite_t, SWT.NONE);
 		GridLayoutFactory.fillDefaults().numColumns(6).equalWidth(true).extendedMargins(20, 10,10,10).spacing(20, 5).applyTo(compos_t2);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(compos_t2);
-		Color[] bcl = {colact, colinact,colstr, colwarn,colout, collow } ; 
-		String[] slblt = {"정상","비활성","미설치","주의","경고","배터리"} ;
+		Color[] bcl = {colact, colinact,colabn, colwarn,colout, collow } ; 
+		String[] slblt = {"정상","비활성","비정상","주의","경고","배터리"} ;
 		for (int i=0;i<6;i++) {
 			ltit = new Label(compos_t2, SWT.BORDER);
 			ltit.setText(" ");

@@ -36,7 +36,11 @@ public class Moteinfo  {
 	public String getDescript() {
 		return this.descript == null ? "" : this.descript;
 	}
-	
+
+	private short errflag1 ;
+	private short errflag2 ;
+	private short errflag3 ;
+
 
 	public short getSwseq() {
 		return swseq;
@@ -209,6 +213,17 @@ public class Moteinfo  {
 		
 		return sb.toString() ;
 		
+	}
+	public short getErrflag1() {
+		return errflag1;
+	}
+
+	public short getErrflag2() {
+		return errflag2;
+	}
+
+	public short getErrflag3() {
+		return errflag3;
 	}
 
 	@Override

@@ -390,25 +390,26 @@ public class DashBoard {
 					j = Arrays.asList(lname).indexOf(mote.getTb() + mote.getLoc()) ;
 
 					if (i > 1 || j > 5 || i < 0 || j < 0) return ;
-					cltemp[i][j].setText(String.format("%.1f", mote.getRtd1()));
-					label_col_set(cltemp[i][j], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd1() == 0 ? 1 
+//					cltemp[i][j].setText(String.format("%.1f", mote.getErrflag1() == 1 ? (mote.getRtd1() > 0 ? 650 : mote.getRtd1() < 0 ? -50 : 0) : mote.getRtd1()  ) );
+					cltemp[i][j].setText(String.format("%.1f",  mote.getRtd1()  ) );
+					label_col_set(cltemp[i][j], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getErrflag1() == 1 ? 9
 							: mote.getStatus() == 0 && mote.getBatt() < AppMain.MOTECNF.getBatt() ? -2 : mote.getStatus());
 					if (j == 0 ) clt[i].setText( mote.getChocknm() ); 
 					if (j == 5 ) clb[i].setText( mote.getChocknm() );  
 				} else {
 					if (mote.getSeq() % 2 == 1) {
-						clunc[0].setText(String.format("%.1f", mote.getRtd1()));
-						clunc[1].setText(String.format("%.1f", mote.getRtd2()));
-						clunc[2].setText(String.format("%.1f", mote.getRtd3()));
-						label_col_set(clunc[0], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd1() == 0 ? 1 : mote.getStatus());
-						label_col_set(clunc[1], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd2() == 0 ? 1 :mote.getStatus2());
-						label_col_set(clunc[2], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd3() == 0 ? 1 :mote.getStatus3());
+						clunc[0].setText(String.format("%.1f", mote.getRtd1()  ) );
+						clunc[1].setText(String.format("%.1f", mote.getRtd2()  ) );
+						clunc[2].setText(String.format("%.1f", mote.getRtd3()  ) );
+						label_col_set(clunc[0], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getErrflag1() == 1 ? 9 : mote.getStatus());
+						label_col_set(clunc[1], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getErrflag2() == 1 ? 9 :mote.getStatus2());
+						label_col_set(clunc[2], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getErrflag3() == 1 ? 9 :mote.getStatus3());
 						
 					} else {
-						clunc[3].setText(String.format("%.1f", mote.getRtd1()));
-						clunc[4].setText(String.format("%.1f", mote.getRtd2()));
-						label_col_set(clunc[3], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd1() == 0 ? 1 : mote.getStatus());
-						label_col_set(clunc[4], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getRtd2() == 0 ? 1 : mote.getStatus2());
+						clunc[3].setText(String.format("%.1f", mote.getRtd1()  ) );
+						clunc[4].setText(String.format("%.1f", mote.getRtd2()  ) );
+						label_col_set(clunc[3], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getErrflag1() == 1 ? 9 : mote.getStatus());
+						label_col_set(clunc[4], mote.getAct() == 0 ? -1 : mote.getAct() == 2 && mote.getErrflag2() == 1 ? 9 : mote.getStatus2());
 					}
 				}
 		});
@@ -442,6 +443,7 @@ public class DashBoard {
 		void label_col_set(CLabel cbl, int sts){
 			Color cl = sts == 2 ? AppMain.colout
 					: sts == 1 ? AppMain.colwarn  
+					: sts == 9 ? AppMain.colabn  
 					: sts == -1 ? AppMain.colinact 
 					: sts == -2 ? AppMain.collow 
 					: AppMain.colact ;
@@ -527,7 +529,9 @@ public class DashBoard {
 		for(Motestatus m : motelist) {
 			activeCnt += m.getAct() == 2 ? 1:0;
 			inactiveCnt += m.getAct() != 2 ? 1:0;
-			activeSsCnt += m.getAct() == 2 && m.getGubun().equals("S") ? 1:0;
+			activeSsCnt += m.getAct() == 2 && m.getErrflag1() == 0 && m.getStand() > 0 && m.getGubun().equals("S") ? 1:0;
+			activeSsCnt += m.getAct() == 2 && m.getCntgb() == 1 && m.getErrflag2() == 0 && m.getStand() > 0 && m.getGubun().equals("S") ? 1:0;
+			activeSsCnt += m.getAct() == 2 && m.getCntgb() == 1 && m.getErrflag3() == 0 && m.getSeq() % 2 == 1 && m.getStand() > 0 && m.getGubun().equals("S") ? 1:0;
 			moteLBCnt += m.getCntgb() == 0 && m.getBatt() > 0 && m.getBatt() < AppMain.MOTECNF.getBatt() ? 1:0;
 		}
 		for(Moteinfo m: moteinfo ) {
@@ -537,9 +541,9 @@ public class DashBoard {
 			wCnt += m.getStatus() == 1 ? 1 :0;
 			wCnt += m.getCntgb() == 1 && m.getStatus2() == 1 ? 1 :0;
 			wCnt += m.getCntgb() == 1 && m.getSeq() % 2 == 1 && m.getStatus3() == 1 ? 1 :0;
-			failCnt +=  m.getAct() == 2 && m.getRtd1() == 0 ? 1 : 0; 
-			failCnt +=  m.getCntgb() == 1 && m.getAct() == 2 && m.getRtd2() == 0 ? 1 : 0; 
-			failCnt +=  m.getCntgb() == 1 && m.getSeq() % 2 == 1 && m.getAct() == 2 && m.getRtd3() == 0 ? 1 : 0; 
+			failCnt +=  m.getAct() == 2 && m.getErrflag1() == 1 ? 1 : 0; 
+			failCnt +=  m.getCntgb() == 1 && m.getAct() == 2 && m.getErrflag2() == 1  ? 1 : 0; 
+			failCnt +=  m.getCntgb() == 1 && m.getSeq() % 2 == 1 && m.getAct() == 2 && m.getErrflag3() == 1  ? 1 : 0; 
 		}
 		
 		lblApActive.setText(activeCnt+    "");

@@ -220,6 +220,8 @@ public class DashBoard2 {
 			@Override
 			public String getText(Object element) {
 				if (element == null)  return "" ;
+				if (((Moteinfo)element).getErrflag1() == 1) 
+					return "비정상" ; 
 				if (((Moteinfo)element).getAct() == 2) 
 					return "Active" ; 
 				else if (((Moteinfo)element).getAct() == 1) 
@@ -231,6 +233,8 @@ public class DashBoard2 {
 			public Image getImage(Object element) {
 				if (element == null)  return AppMain.img_discon ;
 				Moteinfo mote = (Moteinfo)element ;
+				if (mote.getErrflag1() == 1)
+					return AppMain.img_abn ;
 				if (mote.getAct() == 2) 
 					if (mote.getStatus() == 2)
 						return AppMain.img_danger ;
@@ -290,9 +294,11 @@ public class DashBoard2 {
 
 		time_c = AppMain.appmain.getLasTime(1) ;
 
-		List<Moteinfo> moteinfo2 = em.createNativeQuery("SELECT m.pkey, m.mmgb, m.seq, m.cntgb, m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd1, m.batt, m.act,m.temp_d,temp_w ,chocknm, locnm, gubun from vMoteinfo m, LasTime l"
+		List<Moteinfo> moteinfo2 = em.createNativeQuery("SELECT m.pkey, m.mmgb, m.seq, m.cntgb, m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd1, "
+				+ " m.batt, m.act,m.temp_d,temp_w ,chocknm, locnm, gubun, errflag1 from vMoteinfo m, LasTime l"
 				+ " where m.mmgb = '2' and m.tm = l.lastm  UNION "
-				+ "SELECT m.pkey , m.mmgb, m.seq, 0, m.bno, m.stand, m.loc,m.tb,descript, cast(0 as float), m.batt, m.act,temp_d,temp_w, '',locnm, gubun from motestatus m WHERE mmgb = '2' and m.gubun = 'R' AND m.spare = 'N' "
+				+ "SELECT m.pkey , m.mmgb, m.seq, 0, m.bno, m.stand, m.loc,m.tb,descript, cast(0 as float), m.batt, m.act,temp_d,temp_w, '',locnm, gubun,0 "
+				+" from motestatus m WHERE mmgb = '2' and m.gubun = 'R' AND m.spare = 'N' "
 				+ " order by seq "
 				, Moteinfo.class)
 				.getResultList() ;
@@ -300,13 +306,17 @@ public class DashBoard2 {
 		tv2.setInput(moteinfo2);
 		tv2.refresh();
 
-		List<Moteinfo> moteinfo = em.createNativeQuery("SELECT m.pkey,  m.mmgb, m.seq, m.cntgb, m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd1, m.batt, m.act,temp_d,temp_w,chocknm,locnm,gubun from vMoteinfo m, LasTime l"
+		List<Moteinfo> moteinfo = em.createNativeQuery("SELECT m.pkey,  m.mmgb, m.seq, m.cntgb, m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd1, "
+				+ "m.batt, m.act,temp_d,temp_w,chocknm,locnm,gubun, errflag1 from vMoteinfo m, LasTime l"
 				+ " where m.mmgb = '1' and m.tm = l.lastm  UNION  "
-				+ "SELECT m.pkey + 888,  m.mmgb, m.seq,m.cntgb,m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd2, m.batt, m.act,temp_d,temp_w,chocknm, locnm, gubun from vMoteinfo m, LasTime l"
+				+ "SELECT m.pkey + 888,  m.mmgb, m.seq,m.cntgb,m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd2, "
+				+ "m.batt, m.act,temp_d,temp_w,chocknm, locnm, gubun,errflag2 from vMoteinfo m, LasTime l"
 				+ " where m.mmgb = '1' and m.tm = l.lastm and m.cntgb = 1 UNION  "
-				+ "SELECT m.pkey + 999,  m.mmgb, m.seq,m.cntgb,m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd3, m.batt, m.act,temp_d,temp_w,chocknm, locnm, gubun from vMoteinfo m, LasTime l"
+				+ "SELECT m.pkey + 999,  m.mmgb, m.seq,m.cntgb,m.bno, m.stand, m.loc,m.tb, m.descript ,m.rtd3, "
+				+ "m.batt, m.act,temp_d,temp_w,chocknm, locnm, gubun,errflag3 from vMoteinfo m, LasTime l"
 				+ " where m.mmgb = '1' and m.tm = l.lastm and m.cntgb = 1 and m.seq % 2 = 1 UNION "
-				+ "SELECT m.pkey , m.mmgb, m.seq,0, m.bno, m.stand, m.loc,m.tb,descript, cast(0 as float), m.batt, m.act,temp_d,temp_w,'',locnm, gubun from motestatus m WHERE mmgb = '1' and m.gubun = 'R' AND m.spare = 'N' "
+				+ "SELECT m.pkey , m.mmgb, m.seq,0, m.bno, m.stand, m.loc,m.tb,descript, cast(0 as float), "
+				+ "m.batt, m.act,temp_d,temp_w,'',locnm, gubun, 0 from motestatus m WHERE mmgb = '1' and m.gubun = 'R' AND m.spare = 'N' "
 				+ " order by seq , pkey"
 				, Moteinfo.class)
 				.getResultList() ;

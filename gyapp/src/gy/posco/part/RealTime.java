@@ -3,7 +3,6 @@ package gy.posco.part;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -41,6 +40,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
@@ -80,11 +80,11 @@ public class RealTime  {
     private DateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private DateFormat dateFmt1 = new SimpleDateFormat("yyyy-MM-dd");
     private DateFormat timeFmt = new SimpleDateFormat("HH:mm");
-    private Combo cbddown ;
+
     private Cursor busyc = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
     private Cursor curc ;
-    private String[] slist, slistA ;
-    private Button  btnm ,btnb ,btnS,  btnWS, btnDS;
+	private Button  btnWS, btnDS, btnT, btnB , btnlocB , btnlocI, btnlocW , btnAct, btnInact, btnGr, btnNogr;
+	private Spinner sstd , sseq ;
     
 	@PostConstruct
 	public void postConstruct(Composite parent) {
@@ -119,133 +119,141 @@ public class RealTime  {
 		lbl.setText("센서별 이력조회");
 		lbl.setFont(SWTResourceManager.getFont("Tahoma", 22, SWT.BOLD ));
 		
-		
-		
 		Composite composite_2 = new Composite(composite, SWT.NONE);
-		GridLayout gl_in = new GridLayout(14,false);
-		gl_in.marginRight = 50;
-		gl_in.marginLeft = 40;
-		
-		composite_2.setLayout(gl_in);
-		
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
-			.grab(true, false).hint(SWT.DEFAULT, 60).applyTo(composite_2);
+		GridLayoutFactory.fillDefaults().margins(50, -1).numColumns(10).equalWidth(false).spacing(20, -1).applyTo(composite_2);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(composite_2);
 
+		Composite composite_22 = new Composite(composite, SWT.NONE);
+		GridLayoutFactory.fillDefaults().margins(50, -1).numColumns(12).equalWidth(false).applyTo(composite_22);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(composite_22);
+		lbl = new CLabel(composite_2, SWT.NONE) ;
+		lbl.setText("*조회대상선택");
+		lbl.setFont(font2);
+		lbl.pack();
+//		lbl.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         Group  rGroup0 = new Group (composite_2, SWT.NONE);
-        rGroup0.setLayout(new RowLayout(SWT.VERTICAL));
+        rGroup0.setLayout(new RowLayout(SWT.HORIZONTAL));
         rGroup0.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
-    	btnWS = new Button(rGroup0, SWT.CHECK);
-    	btnWS.setText("W/S");
-    	btnWS.setFont(font3);
+
+        btnWS = new Button(rGroup0, SWT.CHECK);
+    	btnWS.setText("W/S ");
+    	btnWS.setFont(font21);
     	btnWS.setSelection(true);
     	btnDS = new Button(rGroup0, SWT.CHECK);
     	btnDS.setText("D/S");
-    	btnDS.setFont(font3);
+    	btnDS.setFont(font21);
     	btnDS.setSelection(true);
+
+		lbl = new CLabel(composite_2, SWT.NONE) ;
+		lbl.setText("*Stand");
+		lbl.setFont(font2);
+		lbl.pack();
+		lbl.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+	
+		sstd = new Spinner(composite_2, SWT.BORDER | SWT.CENTER);
+		sstd.setMinimum(0);
+		sstd.setMaximum(5);
+		sstd.setIncrement(1);
+		sstd.setFont(font21);
+		GridDataFactory.fillDefaults().hint(40, -1).align(SWT.CENTER, SWT.CENTER).applyTo(sstd) ;
+
+		lbl = new CLabel(composite_2, SWT.NONE) ;
+		lbl.setText("*센서번호");
+		lbl.setFont(font2);
+		lbl.pack();
+		lbl.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+	
+		sseq = new Spinner(composite_2, SWT.BORDER | SWT.CENTER);
+		sseq.setMinimum(0);
+		sseq.setMaximum(99);
+		sseq.setIncrement(1);
+		sseq.setFont(font21);
+		GridDataFactory.fillDefaults().hint(50, -1).align(SWT.CENTER, SWT.CENTER).applyTo(sseq) ;
 
         Group  rGroup1 = new Group (composite_2, SWT.NONE);
         rGroup1.setLayout(new RowLayout(SWT.HORIZONTAL));
         rGroup1.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
-        
-    	btnm = new Button(rGroup1, SWT.RADIO);
-    	btnm.setText("센서#");
-    	btnm.setFont(font2);
-    	btnm.setSelection(true);
-    	btnm.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				slist = AppMain.appmain.sno ;
-				slistA = new String[slist.length + 1] ;
-				
-				System.arraycopy(new String[] {" ALL "}, 0, slistA, 0, 1);
-				System.arraycopy(slist,0,slistA, 1, slist.length ) ;
-
-				cbddown.setItems(slistA);
-				cbddown.select(0);
-				cbddown.pack();
-			}
-		});
-
-    	btnb = new Button(rGroup1, SWT.RADIO);
-    	btnb.setText("설치위치 ");
-    	btnb.setFont(font2);
-
-    	btnb.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				cbddown.setItems(new String[] {"ALL","BUR","IMR","WR"});
-				cbddown.select(0);
-				cbddown.pack();
-			}
-		});
-
-    	btnS = new Button(rGroup1, SWT.RADIO);
-    	btnS.setText("Stand#");
-    	btnS.setFont(font2);
-
-    	btnS.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				slist = AppMain.appmain.stand ;
-				slistA = new String[slist.length + 1] ;
-				
-				System.arraycopy(new String[] {" ALL "}, 0, slistA, 0, 1);
-				System.arraycopy(slist,0,slistA, 1, slist.length ) ;
-
-				cbddown.setItems(slistA);
-				cbddown.select(0);
-				cbddown.pack();
-			}
-		});
-
-		cbddown = new Combo(composite_2, SWT.DROP_DOWN | SWT.BORDER);
-		cbddown.setFont(font2);
+    	btnT = new Button(rGroup1, SWT.CHECK);
+    	btnT.setText("Top ");
+    	btnT.setFont(font21);
+    	btnT.setSelection(true);
+    	btnB = new Button(rGroup1, SWT.CHECK);
+    	btnB.setText("Bottom");
+    	btnB.setFont(font21);
+    	btnB.setSelection(true);
+    	
+        Group  rGroup2 = new Group (composite_2, SWT.NONE);
+        rGroup2.setLayout(new RowLayout(SWT.HORIZONTAL));
+        rGroup2.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
+    	btnlocB = new Button(rGroup2, SWT.CHECK);
+    	btnlocB.setText("BUR");
+    	btnlocB.setFont(font21);
+    	btnlocB.setSelection(true);
+    	btnlocI = new Button(rGroup2, SWT.CHECK);
+    	btnlocI.setText("IMR");
+    	btnlocI.setFont(font21);
+    	btnlocI.setSelection(true);
+    	btnlocW = new Button(rGroup2, SWT.CHECK);
+    	btnlocW.setText("WR");
+    	btnlocW.setFont(font21);
+    	btnlocW.setSelection(true);
 		
-		slist = AppMain.appmain.sno ;
-		slistA = new String[slist.length + 1] ;
-		
-		System.arraycopy(new String[] {" ALL "}, 0, slistA, 0, 1);
-		System.arraycopy(slist,0,slistA, 1, slist.length ) ;
+        Group  rGroup3 = new Group (composite_2, SWT.NONE);
+        rGroup3.setLayout(new RowLayout(SWT.HORIZONTAL));
+        rGroup3.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
+    	btnAct = new Button(rGroup3, SWT.CHECK);
+    	btnAct.setText("Active");
+    	btnAct.setFont(font21);
+    	btnAct.setSelection(true);
+    	btnInact = new Button(rGroup3, SWT.CHECK);
+    	btnInact.setText("Inactive");
+    	btnInact.setFont(font21);
+    	btnInact.setSelection(true);
 
-		cbddown.setItems(slistA);
-		cbddown.select(0);
-		cbddown.pack();
-        
-		
-		{
-			lbl = new CLabel(composite_2, SWT.NONE) ;
-			lbl.setText("  * 기간 Date/Time ");
-			lbl.setBackground(COLOR_T);
-			lbl.setFont(font2);
-			lbl.pack();
-		}
+        Group  rGroup4 = new Group (composite_2, SWT.NONE);
+        rGroup4.setLayout(new RowLayout(SWT.HORIZONTAL));
+        rGroup4.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
+    	btnGr = new Button(rGroup4, SWT.RADIO);
+    	btnGr.setText("요약보기");
+    	btnGr.setFont(font21);
+    	btnGr.setSelection(true);
+    	btnNogr = new Button(rGroup4, SWT.RADIO);
+    	btnNogr.setText("모두보기");
+    	btnNogr.setFont(font21);
+    	btnNogr.setSelection(false);
+
+		lbl = new CLabel(composite_22, SWT.NONE) ;
+		lbl.setText("* 기간 Date/Time ");
+		lbl.setBackground(COLOR_T);
+		lbl.setFont(font2);
+		lbl.pack();
+
 		GridData gdinput = new GridData(100,20);
-		DateText fromDate = new DateText(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER  );
+		DateText fromDate = new DateText(composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER  );
 		fromDate.setLayoutData(gdinput);
 		fromDate.setFont(font21);
 		fromDate.addMouseListener(madpt);
-		Calsel calsel = new Calsel(composite_2, SWT.NONE,fromDate) ;
-		TimeText2 fromTm = new TimeText2(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		Calsel calsel = new Calsel(composite_22, SWT.NONE,fromDate) ;
+		TimeText2 fromTm = new TimeText2(composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
 		fromTm.setLayoutData(gdinput);
 		fromTm.setFont(font21);
 		{
-			lbl = new CLabel(composite_2, SWT.NONE) ;
+			lbl = new CLabel(composite_22, SWT.NONE) ;
 			lbl.setText(" ~ ");
 			lbl.setBackground(COLOR_T);
 			lbl.setFont(font2);
 			lbl.pack();
 		}
-		DateText toDate = new DateText(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		DateText toDate = new DateText(composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
 		toDate.setLayoutData(gdinput);
 		toDate.setFont(font21);
 		toDate.addMouseListener(madpt);
-		calsel = new Calsel(composite_2, SWT.NONE,toDate) ;
-		TimeText2 toTm = new TimeText2(composite_2, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
+		calsel = new Calsel(composite_22, SWT.NONE,toDate) ;
+		TimeText2 toTm = new TimeText2(composite_22, SWT.SINGLE | SWT.BORDER | SWT.CENTER );
 		toTm.setLayoutData(gdinput);
 		toTm.setFont(font21);
 
-		Button bq = new Button(composite_2, SWT.PUSH);
+		Button bq = new Button(composite_22, SWT.PUSH);
 		bq.setFont(font21);
 		bq.setText(" Search ");
 		bq.pack();
@@ -266,7 +274,7 @@ public class RealTime  {
 			};
 		} );
         
-		Button bext = new Button(composite_2, SWT.PUSH);
+		Button bext = new Button(composite_22, SWT.PUSH);
 		bext.setFont(font3);
 		bext.setText("파일저장");
 		bext.setForeground(SWTResourceManager.getColor( SWT.COLOR_DARK_BLUE ));
@@ -347,8 +355,6 @@ public class RealTime  {
 		String sfrom = dateFmt.format(fmdt ) ;
 		String sto = dateFmt.format(todt ) ;
 		
-		int sno = 0 ;
-		if  (cbddown.getSelectionIndex() > 0) sno = Integer.parseInt(cbddown.getText() ) ;
 //		retriveData(sfrom, sto);
 //		tv.setInput(findMoteinfo.getMoteHists( fmdt, todt, sno));
 //		tv.refresh();
@@ -364,48 +370,45 @@ public class RealTime  {
 			MessageDialog.openError(parent.getShell(), "날짜확인", "날짜입력이 바르지 않습니다.") ;
 			return ;
 		}
-//		System.out.println(sfrom + " " + sto);
-		int gb = 0 ;
-		String qval = "";
-		if  (cbddown.getSelectionIndex() > 0) {
-			qval = cbddown.getText() ;
-			if (btnm.getSelection() ) gb = 1;
-			if (btnb.getSelection() ) gb = 2;
-			if (btnS.getSelection() ) gb = 3;
-		}
 
 		parent.getShell().setCursor( busyc);
 		
 		em.clear();
 		em.getEntityManagerFactory().getCache().evictAll();
-		String sseqif ;
-		switch (gb) {
-		case 1:
-			sseqif = "and t.seq = " + qval ;
-			break;
-		case 2:
-			sseqif = "and t.loc = '" + qval.substring(0,1) + "'";
-			break;
-		case 3:
-			sseqif = "and t.stand = " + qval ;
-			break;
-		default:
-			sseqif = "" ;
-			break;
-		}
+
+		StringBuilder sbr = new StringBuilder() ;
+		sbr.append(String.format("where tm between '%s' and '%s' ", sfrom, sto )) ;
+		if (sstd.getSelection() > 0 )
+			sbr.append(" and stand = " + sstd.getSelection()) ;
+
+		if ( !btnWS.getSelection() || !btnDS.getSelection())
+			sbr.append(" and mmgb = " + ( btnWS.getSelection() ? "'1'" : "'2'"));
+		if (sseq.getSelection() > 0 ) 
+			sbr.append(" and seq = " + sseq.getSelection()) ;
 		
-		if (btnWS.getSelection() && !btnDS.getSelection()) 
-			sseqif += " and t.mmgb = '1' " ;
-		else if ( ! btnWS.getSelection() && btnDS.getSelection()) 
-			sseqif += " and t.mmgb = '2' " ;
+		if ( !btnT.getSelection() || !btnB.getSelection())
+			sbr.append(" and tb = " + ( btnT.getSelection() ? "'T'" : "'B'"));
+		if ( !btnAct.getSelection() || !btnInact.getSelection())
+			sbr.append(" and act = " + ( btnAct.getSelection() ? "2" : "0"));
+		if ( !btnlocB.getSelection() || !btnlocI.getSelection() || !btnlocW.getSelection()) {
+			sbr.append(" and '") ;
+			sbr.append( btnlocB.getSelection() ? "B" : "") ;
+			sbr.append( btnlocI.getSelection() ? "I" : "") ;
+			sbr.append( btnlocW.getSelection() ? "W" : "") ;
+			sbr.append("' RLIKE loc") ;
+		}
+		String strgr = " group by mmgb, seq, date_format(tm,'%Y%m%d%H%i') , rtd1, stand, loc, tb " ;
 		
 //		List<Motehist> tempList2 = new ArrayList<Motehist>();
 //		ArrayList<Motehist> tempList2 = new ArrayList<Motehist>();
-		List<Motehist>  tempList2 = em.createNativeQuery("select t.* from vMotehist t " 
-        		+ "where t.tm between ?1 and ?2 " + sseqif + " group by t.mmgb, t.seq, t.rtd1, t.stand, t.loc order by t.mmgb, t.seq, t.tm desc, t.stand, t.loc "
+		List<Motehist>  tempList2 = em.createNativeQuery("select pkey, mmgb, seq, swseq, stand, batt, act, rtd1, tm, bno, cntgb, loc, tb, temp_w, temp_d, descript, chocknm, locnm, gubun, errflag1  from vMotehist t " 
+        		+ sbr.toString() + (btnGr.getSelection() ? strgr : "")
+        		+ " union select pkey+991, mmgb, seq, swseq, stand, batt, act, rtd2, tm, bno, cntgb, loc, tb, temp_w, temp_d, descript, chocknm, concat(locnm,' RTD2'), gubun, errflag2  from vMotehist "
+        		+ sbr.toString() + " and cntgb = 1 " + (btnGr.getSelection() ? strgr : "")
+        		+ " union select pkey+992, mmgb, seq, swseq, stand, batt, act, rtd3, tm, bno, cntgb, loc, tb, temp_w, temp_d, descript, chocknm, CONCAT(locnm,' RTD3'), gubun, errflag3  from vMotehist "
+        		+ sbr.toString() + " and cntgb = 1 and seq%2 = 1 " + (btnGr.getSelection() ? strgr : "")
+        		+ "order by mmgb, seq, tm desc, stand, loc, tb desc "
         		, Motehist.class)
-				.setParameter(1, fmdt)
-				.setParameter(2, todt)
 				.getResultList();
 //		tempList2.setParameter("fmdt", fmdt);
 //        qMotes.setParameter("todt", todt);
@@ -484,17 +487,17 @@ public class RealTime  {
 		    case 2:
 		    	return mote.getChocknm();
 		    case 3:
-		    	return mote.getLocNmlong();
+		    	return mote.getLocNmlong() ;
 		    case 4:
 		    	return dateFmt.format( mote.getTm() ) ;
 		    case 5:
 		    	return act[mote.getAct()] ;
 		    case 6:
-		    	return String.format("%.2f", mote.getRtd()) ;
+		    	return String.format("%.2f", mote.getRtd1()) ;
 		    case 7:
 		    	return String.format( "%.3f", mote.getBatt()/1000.0 );
 		    case 8:
-		    	return mote.getRtd() > mote.getTempD() ? "경고" : mote.getRtd() > mote.getTempW() ? "주의":"" ;
+		    	return mote.getErrflag1() == 1 ? "비정상": mote.getRtd() > mote.getTempD() ? "경고" : mote.getRtd() > mote.getTempW() ? "주의":"" ;
 		    }
 			return null;
 		}

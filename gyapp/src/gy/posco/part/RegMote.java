@@ -31,14 +31,16 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
@@ -188,7 +190,8 @@ public class RegMote {
 
 					if (index != -1) {
 						em.getTransaction().begin();
-						Motestatus mote = tempList.get(index);
+						Motestatus mote = (Motestatus) tvlist.getTable().getItem(index).getData() ;
+//						Motestatus mote = tempList.get(index);
 						if (MessageDialog.openConfirm(parent.getShell(), "확인", mote.getDescript() + " : 삭제하시겠습니까?")) {
 							if (!em.contains(mote)) {
 								mote = em.merge(mote);
@@ -246,10 +249,10 @@ public class RegMote {
 		table.setHeaderBackground(AppMain.coltblh);
 
 		tvlist.setUseHashlookup(true);
-		String[] cols1 = new String[] { "WD", "센서번호", "Chock No", "장치위치", "장치설명", "타입", "예비품", "배터리설치일", "상태정보", "Mac 주소" };
-		int[] cwid = new int[] { 80, 90, 110, 200, 250, 60, 90, 150, 120, 230 };
+		String[] cols1 = new String[] { "WD", "센서번호", "Chock", "장치위치", "장치설명", "타입", "예비품", "배터리설치일", "상태정보", "Mac 주소","비정상" };
+		int[] cwid = new int[] { 80, 90, 90, 200, 200, 60, 90, 150, 120, 230,180 };
 		int[] cas1 = new int[] { SWT.CENTER, SWT.CENTER, SWT.CENTER, SWT.CENTER, SWT.CENTER, SWT.CENTER, SWT.CENTER,
-				SWT.CENTER, SWT.CENTER, SWT.CENTER };
+				SWT.CENTER, SWT.CENTER, SWT.CENTER ,SWT.CENTER};
 
 		TableViewerColumn tvcol = new TableViewerColumn(tvlist, SWT.NONE );
 		for (int i = 0; i < cols1.length; i++) {
@@ -282,6 +285,76 @@ public class RegMote {
 			}
 		});
 		
+		Menu popupMenu = new Menu(table);
+	    MenuItem pmreset1 = new MenuItem(popupMenu, SWT.NONE);
+	    pmreset1.setText("RTD1 Reset");
+	    pmreset1.setToolTipText("비정상 RTD1 Reset");
+	    pmreset1.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				
+				if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "RTD1 정상으로 Reset 합니까?")) return ;
+				int icnt = 0 ;
+				for (TableItem ti : table.getSelection() ) {
+					Motestatus mote = (Motestatus) ti.getData() ;
+					if (mote.getErrflag1() == 0 ) continue ;
+					reset_invalid(mote.getPkey(), 1);
+					icnt++ ;
+				}
+				if (icnt > 0 ) {
+					MessageDialog.openInformation(parent.getShell(), "Mote RESET", "Reset 되었습니다.!");
+					refreshSensorList();
+				} else {
+					MessageDialog.openInformation(parent.getShell(), "Mote RESET", "Reset할 센서가 없습니다.");
+				}
+			}
+		});
+	    MenuItem pmreset2 = new MenuItem(popupMenu, SWT.NONE);
+	    pmreset2.setText("RTD2 Reset");
+	    pmreset2.setToolTipText("비정상 RTD1 Reset");
+	    pmreset2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "RTD2 정상으로 Reset 합니까?")) return ;
+				int icnt = 0 ;
+				for (TableItem ti : table.getSelection() ) {
+					Motestatus mote = (Motestatus) ti.getData() ;
+					if (mote.getErrflag2() == 0 ) continue ;
+					reset_invalid(mote.getPkey(), 2);
+					icnt++ ;
+				}
+				if (icnt > 0 ) {
+					MessageDialog.openInformation(parent.getShell(), "Mote RESET", "Reset 되었습니다.!");
+					refreshSensorList();
+				} else {
+					MessageDialog.openInformation(parent.getShell(), "Mote RESET", "Reset할 센서가 없습니다.");
+				}
+			}
+		});
+	    MenuItem pmreset3 = new MenuItem(popupMenu, SWT.NONE);
+	    pmreset3.setText("RTD3 Reset");
+	    pmreset3.setToolTipText("비정상 RTD1 Reset");
+	    pmreset3.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "RTD3 정상으로 Reset 합니까?")) return ;
+				int icnt = 0 ;
+				for (TableItem ti : table.getSelection() ) {
+					Motestatus mote = (Motestatus) ti.getData() ;
+					if (mote.getErrflag3() == 0 ) continue ;
+					reset_invalid(mote.getPkey(), 3);
+					icnt++ ;
+				}
+				if (icnt > 0 ) {
+					MessageDialog.openInformation(parent.getShell(), "Mote RESET", "Reset 되었습니다.!");
+					refreshSensorList();
+				} else {
+					MessageDialog.openInformation(parent.getShell(), "Mote RESET", "Reset할 센서가 없습니다.");
+				}
+			}
+		});
+	    table.setMenu(popupMenu) ;
+	    
 		refreshSensorList();
 //		table.layout();
 		composite_3.layout();
@@ -453,6 +526,15 @@ public class RegMote {
 
 	}
 
+	private void reset_invalid( int pkey,  int px ) {
+		em.getTransaction().begin();
+		em.createNativeQuery("call sp_reset_invalid(?,?)")
+		.setParameter(1, pkey )
+		.setParameter(2, px )
+		.executeUpdate() ;
+		em.getTransaction().commit();
+	}
+	
 //	@SuppressWarnings("unchecked")
 	public void refreshSensorList() {
 		EntityManager em = AppMain.emf.createEntityManager();
@@ -482,7 +564,7 @@ public class RegMote {
 		 * @param columnIndex the column index
 		 * @return Image
 		 */
-
+		 
 		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
@@ -521,6 +603,8 @@ public class RegMote {
 				return statusNm[mote.getAct()];
 			case 10:
 				return mote.getMac();
+			case 11:
+				return (mote.getErrflag1() == 1 ? "E1" : "")+ (mote.getErrflag2() == 1 ? " E2" :"") + (mote.getErrflag3() == 1 ? " E3" :"")  ;
 			}
 			return "";
 		}

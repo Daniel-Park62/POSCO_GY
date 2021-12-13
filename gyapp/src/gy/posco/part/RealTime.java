@@ -84,6 +84,7 @@ public class RealTime  {
     private Cursor busyc = new Cursor(Display.getCurrent(), SWT.CURSOR_WAIT);
     private Cursor curc ;
 	private Button  btnWS, btnDS, btnT, btnB , btnlocB , btnlocI, btnlocW , btnAct, btnInact, btnGr, btnNogr;
+	private Button btnR1, btnR2, btnR3 ;
 	private Spinner sstd , sseq ;
     
 	@PostConstruct
@@ -186,11 +187,11 @@ public class RealTime  {
         rGroup2.setLayout(new RowLayout(SWT.HORIZONTAL));
         rGroup2.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
     	btnlocB = new Button(rGroup2, SWT.CHECK);
-    	btnlocB.setText("BUR");
+    	btnlocB.setText("BUR ");
     	btnlocB.setFont(font21);
     	btnlocB.setSelection(true);
     	btnlocI = new Button(rGroup2, SWT.CHECK);
-    	btnlocI.setText("IMR");
+    	btnlocI.setText("IMR ");
     	btnlocI.setFont(font21);
     	btnlocI.setSelection(true);
     	btnlocW = new Button(rGroup2, SWT.CHECK);
@@ -202,7 +203,7 @@ public class RealTime  {
         rGroup3.setLayout(new RowLayout(SWT.HORIZONTAL));
         rGroup3.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
     	btnAct = new Button(rGroup3, SWT.CHECK);
-    	btnAct.setText("Active");
+    	btnAct.setText("Active ");
     	btnAct.setFont(font21);
     	btnAct.setSelection(true);
     	btnInact = new Button(rGroup3, SWT.CHECK);
@@ -213,14 +214,18 @@ public class RealTime  {
         Group  rGroup4 = new Group (composite_2, SWT.NONE);
         rGroup4.setLayout(new RowLayout(SWT.HORIZONTAL));
         rGroup4.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
-    	btnGr = new Button(rGroup4, SWT.RADIO);
-    	btnGr.setText("요약보기");
-    	btnGr.setFont(font21);
-    	btnGr.setSelection(true);
-    	btnNogr = new Button(rGroup4, SWT.RADIO);
-    	btnNogr.setText("모두보기");
-    	btnNogr.setFont(font21);
-    	btnNogr.setSelection(false);
+    	btnR1 = new Button(rGroup4, SWT.CHECK);
+    	btnR1.setText("비접촉1 ");
+    	btnR1.setFont(font21);
+    	btnR1.setSelection(true);
+    	btnR2 = new Button(rGroup4, SWT.CHECK);
+    	btnR2.setText("2 ");
+    	btnR2.setFont(font21);
+    	btnR2.setSelection(true);
+    	btnR3 = new Button(rGroup4, SWT.CHECK);
+    	btnR3.setText("3");
+    	btnR3.setFont(font21);
+    	btnR3.setSelection(true);
 
 		lbl = new CLabel(composite_22, SWT.NONE) ;
 		lbl.setText("* 기간 Date/Time ");
@@ -253,6 +258,18 @@ public class RealTime  {
 		toTm.setLayoutData(gdinput);
 		toTm.setFont(font21);
 
+        Group  rGroup5 = new Group (composite_22, SWT.NONE);
+        rGroup5.setLayout(new RowLayout(SWT.HORIZONTAL));
+        rGroup5.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
+    	btnGr = new Button(rGroup5, SWT.RADIO);
+    	btnGr.setText("요약보기");
+    	btnGr.setFont(font21);
+    	btnGr.setSelection(true);
+    	btnNogr = new Button(rGroup5, SWT.RADIO);
+    	btnNogr.setText("모두보기");
+    	btnNogr.setFont(font21);
+    	btnNogr.setSelection(false);
+		
 		Button bq = new Button(composite_22, SWT.PUSH);
 		bq.setFont(font21);
 		bq.setText(" Search ");
@@ -401,12 +418,12 @@ public class RealTime  {
 		
 //		List<Motehist> tempList2 = new ArrayList<Motehist>();
 //		ArrayList<Motehist> tempList2 = new ArrayList<Motehist>();
-		List<Motehist>  tempList2 = em.createNativeQuery("select pkey, mmgb, seq, swseq, stand, batt, act, rtd1, tm, bno, cntgb, loc, tb, temp_w, temp_d, descript, chocknm, locnm, gubun, errflag1  from vMotehist t " 
-        		+ sbr.toString() + (btnGr.getSelection() ? strgr : "")
-        		+ " union select pkey+991, mmgb, seq, swseq, stand, batt, act, rtd2, tm, bno, cntgb, loc, tb, temp_w, temp_d, descript, chocknm, concat(locnm,' RTD2'), gubun, errflag2  from vMotehist "
-        		+ sbr.toString() + " and cntgb = 1 " + (btnGr.getSelection() ? strgr : "")
-        		+ " union select pkey+992, mmgb, seq, swseq, stand, batt, act, rtd3, tm, bno, cntgb, loc, tb, temp_w, temp_d, descript, chocknm, CONCAT(locnm,' RTD3'), gubun, errflag3  from vMotehist "
-        		+ sbr.toString() + " and cntgb = 1 and seq%2 = 1 " + (btnGr.getSelection() ? strgr : "")
+		List<Motehist>  tempList2 = em.createNativeQuery("select pkey, mmgb, seq, swseq, stand, batt, act, rtd1, tm, bno, cntgb, loc, tb, temp_w, temp_d, descript, chocknm, concat(locnm,'-1') locnm, gubun, errflag1  from vMotehist t " 
+        		+ sbr.toString() + (btnR1.getSelection() ? "" : " and cntgb = 0 ") + (btnGr.getSelection() ? strgr : "") 
+        		+ " union select pkey+991, mmgb, seq, swseq, stand, batt, act, rtd2, tm, bno, cntgb, loc, tb, temp_w, temp_d, descript, chocknm, concat(locnm,'-2'), gubun, errflag2  from vMotehist "
+        		+ sbr.toString() + " and cntgb = " + (btnR2.getSelection() ? "1 " : "2 ") + (btnGr.getSelection() ? strgr : "") 
+        		+ " union select pkey+992, mmgb, seq, swseq, stand, batt, act, rtd3, tm, bno, cntgb, loc, tb, temp_w, temp_d, descript, chocknm, CONCAT(locnm,'-3'), gubun, errflag3  from vMotehist "
+        		+ sbr.toString() + " and seq%2 = 1 and cntgb = " + (btnR3.getSelection() ? "1 " : "2 ") + (btnGr.getSelection() ? strgr : "") 
         		+ "order by mmgb, seq, tm desc, stand, loc, tb desc "
         		, Motehist.class)
 				.getResultList();

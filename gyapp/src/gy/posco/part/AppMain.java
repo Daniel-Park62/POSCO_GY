@@ -312,6 +312,7 @@ public class AppMain extends ApplicationWindow {
 
 		cur_comp.setToolTipText("DashBoard");
 		thread1 = new MyThread(Display.getCurrent(), MOTECNF.getMeasure() * 1000);
+		thread1.setDaemon(true);
 		thread1.start();
 
 		return parent;

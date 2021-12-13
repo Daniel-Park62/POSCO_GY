@@ -90,7 +90,7 @@ public class ViewChart {
 	private DateText  fromDate, toDate ;
 	private TimeText2 fromTm,  toTm ;
 	private Text ftemp, ttemp ; 
-	private Button  btnWS, btnDS, btnT, btnB , btnlocB , btnlocI, btnlocW;
+	private Button  btnWS, btnDS, btnT, btnB , btnlocB , btnlocI, btnlocW, btnUn, btnR1,btnR2,btnR3;
 	private Spinner sstd ;
 	
 	public ViewChart(Composite parent, int style, String[] bnos, String fdt ) throws InterruptedException {
@@ -130,7 +130,7 @@ public class ViewChart {
 		lticon.setFont( SWTResourceManager.getFont("Tahoma", 22, SWT.BOLD ) );
     	
 		Composite composite_2 = new Composite(parent, SWT.NONE);
-		GridLayoutFactory.fillDefaults().margins(50, -1).numColumns(6).equalWidth(false).spacing(20, -1).applyTo(composite_2);
+		GridLayoutFactory.fillDefaults().margins(50, -1).numColumns(8).equalWidth(false).spacing(20, -1).applyTo(composite_2);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(composite_2);
 
 		Composite composite_22 = new Composite(parent, SWT.NONE);
@@ -184,18 +184,46 @@ public class ViewChart {
         rGroup2.setLayout(new RowLayout(SWT.HORIZONTAL));
         rGroup2.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
     	btnlocB = new Button(rGroup2, SWT.CHECK);
-    	btnlocB.setText("BUR");
+    	btnlocB.setText("BUR ");
     	btnlocB.setFont(font21);
     	btnlocB.setSelection(true);
     	btnlocI = new Button(rGroup2, SWT.CHECK);
-    	btnlocI.setText("IMR");
+    	btnlocI.setText("IMR ");
     	btnlocI.setFont(font21);
     	btnlocI.setSelection(true);
     	btnlocW = new Button(rGroup2, SWT.CHECK);
-    	btnlocW.setText("WR");
+    	btnlocW.setText("WR ");
     	btnlocW.setFont(font21);
     	btnlocW.setSelection(true);
+    	btnUn = new Button(rGroup2, SWT.CHECK);
+    	btnUn.setText("비접촉");
+    	btnUn.setFont(font21);
+    	btnUn.setSelection(true);
 
+        Group  rGroup4 = new Group (composite_2, SWT.NONE);
+        rGroup4.setLayout(new RowLayout(SWT.HORIZONTAL));
+        rGroup4.setFont(SWTResourceManager.getFont(  "", 1, SWT.NORMAL));
+    	btnR1 = new Button(rGroup4, SWT.CHECK);
+    	btnR1.setText("비접촉1 ");
+    	btnR1.setFont(font21);
+    	btnR1.setSelection(true);
+    	btnR2 = new Button(rGroup4, SWT.CHECK);
+    	btnR2.setText("2 ");
+    	btnR2.setFont(font21);
+    	btnR2.setSelection(true);
+    	btnR3 = new Button(rGroup4, SWT.CHECK);
+    	btnR3.setText("3");
+    	btnR3.setFont(font21);
+    	btnR3.setSelection(true);
+    	rGroup4.setVisible(btnUn.getSelection()) ;
+    	btnUn.addSelectionListener(new SelectionAdapter() {
+    		@Override
+    		public void widgetSelected(SelectionEvent e) {
+    			rGroup4.setVisible(btnUn.getSelection()) ;
+    			super.widgetSelected(e);
+    		}
+		});
+    	
 		{
 			lbl = new Label(composite_22, SWT.NONE) ;
 			lbl.setText("*조회기간 ");
@@ -475,6 +503,9 @@ public class ViewChart {
 		jo.put("ttemp", ttemp.getText());
 		jo.put("ftm", sdt) ;
 		jo.put("ttm", tdt);
+		if (btnUn.getSelection() && btnR1.getSelection() ) jo.put("rtd1", "1" ) ;
+		if (btnUn.getSelection() && btnR2.getSelection() ) jo.put("rtd2", "1" ) ;
+		if (btnUn.getSelection() && btnR3.getSelection() ) jo.put("rtd3", "1" ) ;
 /*		
 		String val = "{ \"gb\" : \""  + ( gb == 0 ? "bno":"seq") + "\" ," 
 				   + " \"sq\" : [" + ids + "] ,"

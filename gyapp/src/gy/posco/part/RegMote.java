@@ -118,10 +118,10 @@ public class RegMote {
 		 * { if ( e.keyCode == SWT.F15 ) refreshSensorList(); } });
 		 */
 		Composite modbutton = new Composite(composite, SWT.NORMAL);
-		GridLayout gl_layout = new GridLayout(4, false);
+		GridLayout gl_layout = new GridLayout(5, false);
 		gl_layout.marginLeft = 15;
 		modbutton.setLayout(gl_layout);
-		modbutton.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 1, 1));
+		modbutton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		modbutton.setBackground(SWTResourceManager.getColor(SWT.COLOR_TRANSPARENT));
 		{
 			Button b = new Button(modbutton, SWT.ON_TOP);
@@ -228,6 +228,38 @@ public class RegMote {
 				}
 			});
 		}
+		{
+			Button b = new Button(modbutton, SWT.ON_TOP| SWT.END);
+			b.setFont(font2);
+			b.setText("비정상Reset(전체)");
+			b.setSize(-11, 50);
+			GridDataFactory.fillDefaults().align(SWT.RIGHT, SWT.TOP).grab(true,false).applyTo(b) ;
+			b.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "모두 정상으로 Reset 합니까?")) return ;
+					int icnt = 0 ;
+					for (TableItem ti : table.getItems() ) {
+						Motestatus mote = (Motestatus) ti.getData() ;
+						if (mote.getErrflag1() == 1 ) 
+							reset_invalid(mote.getPkey(), 1);
+						if (mote.getErrflag2() == 1 ) 
+							reset_invalid(mote.getPkey(), 2);
+						if (mote.getErrflag3() == 1 ) 
+							reset_invalid(mote.getPkey(), 3);
+						if ( mote.getErrflag1() + mote.getErrflag2() + mote.getErrflag3() > 0)
+							icnt++ ;
+					}
+					if (icnt > 0 ) {
+						MessageDialog.openInformation(parent.getShell(), "Mote RESET", "Reset 되었습니다.!");
+						refreshSensorList();
+					} else {
+						MessageDialog.openInformation(parent.getShell(), "Mote RESET", "Reset할 센서가 없습니다.");
+					}
+				}
+			});
+		}
 
 		Composite composite_3 = new Composite(composite, SWT.NONE);
 		GridLayoutFactory.fillDefaults().margins(15, 5).equalWidth(false).numColumns(2).applyTo(composite_3);
@@ -287,13 +319,13 @@ public class RegMote {
 		
 		Menu popupMenu = new Menu(table);
 	    MenuItem pmreset1 = new MenuItem(popupMenu, SWT.NONE);
-	    pmreset1.setText("RTD1 Reset");
+	    pmreset1.setText("E1 Reset");
 	    pmreset1.setToolTipText("비정상 RTD1 Reset");
 	    pmreset1.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				
-				if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "RTD1 정상으로 Reset 합니까?")) return ;
+				if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "E1 정상으로 Reset 합니까?")) return ;
 				int icnt = 0 ;
 				for (TableItem ti : table.getSelection() ) {
 					Motestatus mote = (Motestatus) ti.getData() ;
@@ -310,12 +342,12 @@ public class RegMote {
 			}
 		});
 	    MenuItem pmreset2 = new MenuItem(popupMenu, SWT.NONE);
-	    pmreset2.setText("RTD2 Reset");
-	    pmreset2.setToolTipText("비정상 RTD1 Reset");
+	    pmreset2.setText("E2 Reset");
+	    pmreset2.setToolTipText("비정상 E2 Reset");
 	    pmreset2.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "RTD2 정상으로 Reset 합니까?")) return ;
+				if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "E2 정상으로 Reset 합니까?")) return ;
 				int icnt = 0 ;
 				for (TableItem ti : table.getSelection() ) {
 					Motestatus mote = (Motestatus) ti.getData() ;
@@ -332,12 +364,12 @@ public class RegMote {
 			}
 		});
 	    MenuItem pmreset3 = new MenuItem(popupMenu, SWT.NONE);
-	    pmreset3.setText("RTD3 Reset");
-	    pmreset3.setToolTipText("비정상 RTD1 Reset");
+	    pmreset3.setText("E3 Reset");
+	    pmreset3.setToolTipText("비정상 E3 Reset");
 	    pmreset3.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "RTD3 정상으로 Reset 합니까?")) return ;
+				if ( ! MessageDialog.openConfirm(parent.getShell(), "확인", "E3 정상으로 Reset 합니까?")) return ;
 				int icnt = 0 ;
 				for (TableItem ti : table.getSelection() ) {
 					Motestatus mote = (Motestatus) ti.getData() ;

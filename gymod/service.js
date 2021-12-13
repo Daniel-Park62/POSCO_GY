@@ -16,14 +16,19 @@ router.all('/*', function(req, res, next) {
 router.post('/stand', (req, res) => {
   let fdt = moment(req.body.ftm,["YYYYMMDDHHmmss","YYYYMMDD"]).format('YYYY-MM-DD HH:mm:ss') ;
   let tdt = moment(req.body.ttm,["YYYYMMDDHHmmss","YYYYMMDD"]).format('YYYY-MM-DD HH:mm:ss') ;
-
-  // console.log(req.body) ;
+  let where_str = req.body.cond + " and tm between '" + fdt + "' and '" + tdt + "' and rtd" ;
+  // console.log(req.body, where_str) ;
   // bodym = JSON.parse(JSON.stringify(req.body));
   // console.log(bodym) ;
+
   con.query(
-      "SELECT loc_name as seq, temp,  date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
-      where "+ req.body.cond + " and tm between ? and ?  and temp between ? and ? order by loc_name, tm " ,
-       [ fdt, tdt, req.body.ftemp, req.body.ttemp] )
+      "SELECT if(cntgb=1,concat(locnm,'-1'),loc_name) as seq, rtd1 temp,  date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
+      where "+ where_str + "1 between ? and ? "  // + (req.body.rtd1 ? "" : "and cntgb=2 ") 
+      + " union select concat(locnm,'-2'), rtd2, date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
+      where "+ where_str + "2 between ? and ? and " + (req.body.rtd2 ? "cntgb=1 " : "cntgb=2 ")
+      +" union select concat(locnm,'-3'), rtd3, date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
+      where "+ where_str + "3 between ? and ? and seq%2 = 1 and " + (req.body.rtd3 ? "cntgb=1 " : "cntgb=2 ") +" order by seq, tm",
+       [ req.body.ftemp, req.body.ttemp,req.body.ftemp, req.body.ttemp,req.body.ftemp, req.body.ttemp] )
     .then( dt => {
         // motesmac = JSON.parse(JSON.stringify(dt)) ;
 
@@ -52,7 +57,7 @@ router.post('/stand', (req, res) => {
         res.json(sdata);
       })
       .catch( err => {
-        console.error(err) ;
+        console.error(err.sql) ;
         res.send(err);
       }) ;
 });

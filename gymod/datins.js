@@ -58,7 +58,7 @@ process.on("message", async (dat) => {
       console.info('time interval :' , MEAS, " Battery Limit :" , BATTL, UPDAUTO );
       console.log("Interval 변경:",MEAS) ;
       clearTimeout(mainto) ;
-      mainto = setTimeout( main_loop, 2000) ;
+      mainto = setTimeout(main_loop, 2000) ;
     });
 
     ws_ss.forEach(ss => { ss[8] == 'B' && ss.Mac && ws_sensor_push(ss.Mac,  ss[2]) }  );
@@ -544,7 +544,7 @@ function ws_sensor_set( buf1 ) {
   socket.on('error', function (err) {
       // console.error(" *** ws Error : ", Date() ,buf1.toString('hex') , JSON.stringify(err));
       // ws_buffarr.unshift(buf1) ;
-      setTimeout( ws_sensor_set,0,buf1) ;
+      setTimeout( ws_sensor_set,500,buf1) ;
   });
   // writeData(socket, buf1) ;
 }
@@ -571,7 +571,7 @@ function ds_sensor_set( buf1 ) {
   socket.on('error', function (err) {
       // console.error(" *** ds Error : ", Date() ,buf1.toString('hex') , JSON.stringify(err));
       // ds_buffarr.unshift(buf1) ;
-      setTimeout( ds_sensor_set,0,buf1) ;
+      setTimeout( ds_sensor_set,500,buf1) ;
 
   });
   // writeData(socket, buf1) ;

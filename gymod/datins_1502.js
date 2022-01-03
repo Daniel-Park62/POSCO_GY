@@ -2,7 +2,7 @@
 let WS_NUM = 3;
 let DS_NUM = 3;
 let SSNUM = 3;
-const TAGPORT = 502;
+const TAGPORT = 1502;
 const DEVPORT = 1503;
 
 let GWIP_WS = process.env.GWIP_WS || "192.168.0.223";
@@ -296,12 +296,11 @@ function insTemp(con) {
               vrtd3 = rtags[a+2] / 100;
               vtemp = rtags[a+3] / 100;
             } else continue ;
-      /*
             if ( isNaN(vrtd1) || vrtd1 == 0.09) vrtd1 = 0 ;
             if ( isNaN(vrtd2) || vrtd2 == 0.09) vrtd2 = 0 ;
             if ( isNaN(vrtd3) || vrtd3 == 0.09) vrtd3 = 0 ;
             if ( isNaN(vtemp) || vtemp == 0.09) vtemp = 0 ;
-             if ( vrtd1 < 0) vrtd1 = -52 ;
+/*             if ( vrtd1 < 0) vrtd1 = -52 ;
             if ( vrtd2 < 0) vrtd2 = -52 ;
             if ( vrtd3 < 0) vrtd3 = -52 ;
             if ( vtemp < 0) vtemp = -52 ;
@@ -380,11 +379,10 @@ function insTemp(con) {
               let a = ix * 2 - 1 ;
               vrtd1 = rtags[a -1] / 100;
               vtemp = rtags[a] / 100;
-          /*
               if ( isNaN(vrtd1) || vrtd1 == 0.09) vrtd1 = 0 ;
               if ( isNaN(vtemp) || vtemp == 0.09) vtemp = 0 ;
               
-               if ( vrtd1 < 0) vrtd1 = -52 ;
+/*               if ( vrtd1 < 0) vrtd1 = -52 ;
               if ( vtemp < 0) vtemp = -52 ;
               if ( vrtd1 > 200) vrtd1 = 650 ;
               if ( vtemp > 200) vtemp = 650 ;

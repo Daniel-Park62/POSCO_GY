@@ -51,8 +51,7 @@ process.on('uncaughtException', function (err) {
 
 console.log("** 4PCM RM Roll 데이터수집 start **") ;
 
-const child = fork(path.join(__dirname, "datins.js"));
-
+const child = fork(path.join(__dirname, "datins.js"), [process.argv[2] || 502]);
 child.on("close", function (code) {
   console.log("child process exited with code " + code);
 });

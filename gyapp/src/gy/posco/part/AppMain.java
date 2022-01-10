@@ -499,13 +499,13 @@ public class AppMain extends ApplicationWindow {
 			}
 		});
 
-		Label lblChart2 = new Label(composite_8, SWT.NONE);
-		lblChart2.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
-		lblChart2.setFont(fontMenu);
-		lblChart2.setText("데이터 분석");
-		lblChart2.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		Label lblChart = new Label(composite_8, SWT.NONE);
+		lblChart.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
+		lblChart.setFont(fontMenu);
+		lblChart.setText("데이터 분석");
+		lblChart.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 
-		lblChart2.addMouseListener(new MouseAdapter() {
+		lblChart.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
 
@@ -515,6 +515,25 @@ public class AppMain extends ApplicationWindow {
 				cur_comp.setSize(cur_comp.getParent().getSize());
 				cur_comp.getParent().layout();
 				cur_comp.setToolTipText("ViewChart");
+			}
+		});
+
+		Label lblChart2 = new Label(composite_8, SWT.NONE);
+		lblChart2.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
+		lblChart2.setFont(fontMenu);
+		lblChart2.setText("통신상태 분석");
+		lblChart2.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+
+		lblChart2.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent e) {
+
+				delWidget(cur_comp);
+				cur_comp.setLayout(new FillLayout());
+				new ViewChart2(cur_comp, SWT.NONE);
+				cur_comp.setSize(cur_comp.getParent().getSize());
+				cur_comp.getParent().layout();
+				cur_comp.setToolTipText("ViewChart2");
 			}
 		});
 

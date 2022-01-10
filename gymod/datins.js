@@ -2,13 +2,14 @@
 let WS_NUM = 3;
 let DS_NUM = 3;
 let SSNUM = 3;
-const TAGPORT = 502;
+const TAGPORT = process.argv[2] ;
 const DEVPORT = 1503;
 
 let GWIP_WS = process.env.GWIP_WS || "192.168.0.223";
 let GWIP_DS = process.env.GWIP_DS || "192.168.0.223";
 
 console.info("(GWIP_WS)", GWIP_WS, "(GWIP_DS)", GWIP_DS);
+console.info("Tag Port", TAGPORT);
 
 const moment = require('moment');
 

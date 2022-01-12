@@ -43,7 +43,7 @@ let chartx = {
         width: 1,
         color: 'green'
     },
-    tickInterval: 30,
+    tickInterval: 50,
     gridLineWidth: 1,
     type: 'datetime',
     labels: {
@@ -158,6 +158,10 @@ chartx.chart.height = h;
 }
 
 function updChart(qdata, nm) {
+  
+  chartx.xAxis.categories = ['조회중'] ;
+  chartx.series = [{data:0}];
+  chart = Highcharts.chart('container',chartx );
 
 $.post( "http://"+ location.hostname + ":9977/Chart/stat", qdata )
 .done(function( data ) {
@@ -172,7 +176,7 @@ $.post( "http://"+ location.hostname + ":9977/Chart/stat", qdata )
   // changesize(700) ;
   chart = Highcharts.chart('container',chartx );
 
-  chart.reflow();
+  // chart.reflow();
 }).fail(function() {
   alert( "error" + qdata );
 });

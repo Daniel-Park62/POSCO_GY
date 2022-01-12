@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const gydb = require('./db/dbconn');
+const util = require('util') ;
 let con = gydb.getPool() ;
 
 const moment = require('moment');
@@ -16,19 +17,22 @@ router.all('/*', function(req, res, next) {
 router.post('/stand', (req, res) => {
   let fdt = moment(req.body.ftm,["YYYYMMDDHHmmss","YYYYMMDD"]).format('YYYY-MM-DD HH:mm:ss') ;
   let tdt = moment(req.body.ttm,["YYYYMMDDHHmmss","YYYYMMDD"]).format('YYYY-MM-DD HH:mm:ss') ;
-  let where_str = req.body.cond + " and tm between '" + fdt + "' and '" + tdt + "' and rtd" ;
+  let where_str = req.body.cond + util.format(" and tm between '%s' and '%s' and rtd1 between %d and %d ", fdt,tdt,req.body.ftemp, req.body.ttemp)  ;
+  let where_str2 = req.body.cond2 + util.format(" and tm between '%s' and '%s' and cntgb = 1 and rtd2 between %d and %d ", fdt,tdt,req.body.ftemp, req.body.ttemp)  ;
+  let where_str3 = req.body.cond2 + util.format(" and tm between '%s' and '%s' and cntgb = 1 and rtd3 between %d and %d and seq%2 = 1 ", fdt,tdt,req.body.ftemp, req.body.ttemp)  ;
   // console.log(req.body, where_str) ;
   // bodym = JSON.parse(JSON.stringify(req.body));
   // console.log(bodym) ;
 
   con.query(
-      "SELECT if(cntgb=1,concat(locnm,'-1'),loc_name) as seq, rtd1 temp,  date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
-      where "+ where_str + "1 between ? and ? "  // + (req.body.rtd1 ? "" : "and cntgb=2 ") 
-      + " union select concat(locnm,'-2'), rtd2, date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
-      where "+ where_str + "2 between ? and ? and " + (req.body.rtd2 ? "cntgb=1 " : "cntgb=2 ")
-      +" union select concat(locnm,'-3'), rtd3, date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
-      where "+ where_str + "3 between ? and ? and seq%2 = 1 and " + (req.body.rtd3 ? "cntgb=1 " : "cntgb=2 ") +" order by seq, tm",
-       [ req.body.ftemp, req.body.ttemp,req.body.ftemp, req.body.ttemp,req.body.ftemp, req.body.ttemp] )
+      "SELECT loc_name as seq, rtd1 temp,  date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
+      where "+ where_str + " and cntgb = 0 "
+      + (req.body.rtd1 ? " union select concat(locnm,seq,'-1'), rtd1, date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
+      where "+ where_str2 + " and cntgb = 1 " : "") 
+      + (req.body.rtd2 ? " union select concat(locnm,seq,'-2'), rtd2, date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
+      where "+ where_str2 + " and cntgb = 1 " : "") 
+      + (req.body.rtd3 ? " union select concat(locnm,seq,'-3'), rtd3, date_format(tm,'%Y-%m-%d %T') tm  FROM vmotehist  \
+      where "+ where_str3 + " and seq%2=1 and cntgb = 1 " : "")  +" order by seq, tm" )
     .then( dt => {
         // motesmac = JSON.parse(JSON.stringify(dt)) ;
 
@@ -72,7 +76,7 @@ router.post('/stat', (req, res) => {
   // console.log(bodym) ;
 
   con.query(
-      "SELECT date_format(tm,'%Y-%m-%d %T') tm, min(if(act < 2,0,1)) act  FROM vmotehist  \
+      "SELECT date_format(tm,'%Y-%m-%d %T') tm, min(if(act < 2,0,1)) act  FROM motehist  \
       where "+ where_str + " group by tm order by tm " )
     .then( dt => {
         // motesmac = JSON.parse(JSON.stringify(dt)) ;

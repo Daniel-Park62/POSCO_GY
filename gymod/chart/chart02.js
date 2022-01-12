@@ -181,12 +181,14 @@ function changesize(h) {
 }
 
 function updChart(qdata) {
-
+    chartx.xAxis.categories = ['조회중'] ;
+    chartx.series = [{data:0}];
+    chart = Highcharts.chart('container',chartx );
   $.post( "http://"+ location.hostname + ":9977/Chart/stand", qdata )
   .done(function( data ) {
     let obj = JSON.parse(data);
     console.log( obj );
-    chartx.series = [] ;
+    chartx.series = [1] ;
     // obj.series.forEach((d,i) => chartx.series.push(d) ) ;
     obj.series.forEach( function(d,i) {chartx.series.push(d) });
     categories = obj.categorie ;

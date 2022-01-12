@@ -99,12 +99,23 @@ public class ViewChart {
 		fromDate.setText(fdt.substring(0,10));
 		fromTm.setText(fdt.substring(11));
 
-		browser.addProgressListener(new ProgressAdapter() {
-		  @Override
-		  public void completed(ProgressEvent event) {
-				refreshChart( );
-		  }
-		});
+		AppMain.appmain.callf = new IcallFunc() {
+			@Override
+			public void callFunc() {
+			}
+
+			@Override
+			public void finalFunc() {
+				browser.stop();
+			}
+		};
+		
+//		browser.addProgressListener(new ProgressAdapter() {
+//		  @Override
+//		  public void completed(ProgressEvent event) {
+//				refreshChart( );
+//		  }
+//		});
 
 	}
     public ViewChart(Composite parent, int style) {
@@ -311,8 +322,8 @@ public class ViewChart {
 					return ;
 				}
 //				refreshChart( cbddown.getSelectionIndex(), sfrom, sto , ftemp.getText(), ttemp.getText());
+				browser.stop();
 				refreshChart( );
-
 			}
 		}); 
 
@@ -479,10 +490,13 @@ public class ViewChart {
 			return ;
 		}
 		StringBuilder sbr = new StringBuilder() ;
+		StringBuilder sbr2 = new StringBuilder() ;
 		sbr.append("stand = " + sstd.getSelection()) ;
 
 		if ( !btnWS.getSelection() || !btnDS.getSelection())
 			sbr.append(" and mmgb = " + ( btnWS.getSelection() ? "'1'" : "'2'"));
+		
+		sbr2.append(sbr) ;
 		if ( !btnT.getSelection() || !btnB.getSelection())
 			sbr.append(" and tb = " + ( btnT.getSelection() ? "'T'" : "'B'"));
 		if ( !btnlocB.getSelection() || !btnlocI.getSelection() || !btnlocW.getSelection()) {
@@ -499,6 +513,7 @@ public class ViewChart {
 
 		JSONObject jo = new JSONObject() ;
 		jo.put("cond", sbr.toString() ) ;
+		jo.put("cond2", sbr2.toString() ) ;
 		jo.put("ftemp", ftemp.getText()) ;
 		jo.put("ttemp", ttemp.getText());
 		jo.put("ftm", sdt) ;
@@ -517,9 +532,9 @@ public class ViewChart {
 		   ;
 		String val = jo.toJSONString() ;
 //		System.out.println(val);
+		
 		browser.execute("updChart(" + val + ");");
 		browser.requestLayout() ;
-//		browser.refresh();
     }
 
 	private class ContentProvider implements IStructuredContentProvider {

@@ -14,13 +14,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressAdapter;
 import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
@@ -83,11 +82,23 @@ public class ViewChart2 {
 		id_list.setSelection(bnos);
 		fromDate.setText(fdt.substring(0,10));
 		fromTm.setText(fdt.substring(11));
+		AppMain.appmain.callf = new IcallFunc() {
+			@Override
+			public void callFunc() {
+			}
+
+			@Override
+			public void finalFunc() {
+				browser.stop();
+			}
+		};
 
 		browser.addProgressListener(new ProgressAdapter() {
 		  @Override
 		  public void completed(ProgressEvent event) {
-				refreshChart( );
+//				refreshChart( );
+//				browser.getShell().setCursor(AppMain.handc);
+				System.out.println("aaaaa");
 		  }
 		});
 
@@ -202,6 +213,7 @@ public class ViewChart2 {
 					MessageDialog.openError(null, "날짜확인", "날짜입력을 바르게 하세요.") ;
 					return ;
 				}
+				browser.stop();
 				refreshChart( );
 
 			}
@@ -330,9 +342,8 @@ public class ViewChart2 {
 
 		String val = jo.toJSONString() ;
 //		System.out.println("updChart(" + val + ",\"" + (btnStd.getSelection() ? "stand " : "센서번호 ") + sstd.getSelection() + "\")");
+//		browser.getShell().setCursor( AppMain.busyc);
 		browser.execute("updChart(" + val + ",\"" + (btnStd.getSelection() ? "stand " : "센서번호 ") + sstd.getSelection() + "\")" );
-
-		browser.requestLayout() ;
 		
 //		browser.refresh();
     }
